@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="配当DB2">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>大型株 配当利回りダッシュボード</title>
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Arial,'Hiragino Sans',sans-serif;background:#f0f2f5;color:#1a1a2e;font-size:13px}
+header{background:#1a1a2e;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:15px;font-weight:700;letter-spacing:.5px}
+header .meta{font-size:10px;color:#8899bb;text-align:right;line-height:1.6}
+.stats-row{display:flex;gap:10px;padding:12px 16px;background:#1a1a2e;border-top:1px solid #2d3a5a}
+.stat{flex:1;background:#232f4a;padding:8px 12px;border-radius:6px;text-align:center}
+.stat .lbl{font-size:10px;color:#8899bb;margin-bottom:2px}
+.stat .val{font-size:16px;font-weight:700;color:#7eb8f7}
+.controls{padding:10px 16px;background:#fff;border-bottom:1px solid #e0e6ef;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search{padding:6px 10px;border:1px solid #c8d4e8;border-radius:5px;font-size:12px;width:220px;outline:none}
+.search:focus{border-color:#4a90d9}
+.sort-hint{font-size:11px;color:#888;margin-left:auto}
+.count-badge{font-size:11px;color:#666;background:#f0f4fa;padding:4px 8px;border-radius:10px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff}
+thead th{background:#232f4a;color:#c8d8f0;padding:9px 10px;text-align:left;font-size:11px;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap;border-right:1px solid #2d3a5a;position:sticky;top:0;z-index:1}
+thead th:last-child{border-right:none}
+thead th:hover{background:#2d3a5a}
+thead th.sort-asc::after{content:' ▲';font-size:9px;color:#7eb8f7}
+thead th.sort-desc::after{content:' ▼';font-size:9px;color:#7eb8f7}
+tbody tr{border-bottom:1px solid #eef1f7;transition:background .1s}
+tbody tr:hover{background:#f5f8ff}
+tbody tr:nth-child(even){background:#fafbfd}
+tbody tr:nth-child(even):hover{background:#f0f5ff}
+td{padding:7px 10px;vertical-align:middle}
+.td-code{font-family:monospace;font-size:11px;color:#7090b0;font-weight:600;min-width:48px}
+.td-name{font-weight:600;font-size:12px;min-width:110px;max-width:130px}
+.td-name a{color:#1a1a2e;text-decoration:none}
+.td-name a:hover{color:#4a90d9;text-decoration:underline}
+.yield-num{font-size:14px;font-weight:700}
+.y-5plus{color:#00695c}
+.y-45{color:#1b7e3a}
+.y-4{color:#2e7d32}
+.y-35{color:#558b2f}
+.y-3{color:#8f9c3e}
+.y-low{color:#9e9e9e}
+.avg-num{font-size:13px;font-weight:600;color:#1565c0}
+.bar-cell{min-width:130px}
+.bar-bg{background:#e8ecf4;border-radius:3px;height:10px;width:110px;position:relative;flex-shrink:0;overflow:visible}
+.bar-fill{height:10px;border-radius:3px}
+.bar-marker-red{position:absolute;top:-3px;width:2px;height:16px;background:#e53935;border-radius:1px}
+.bar-marker-blue{position:absolute;top:-3px;width:2px;height:16px;background:#1565c0;border-radius:1px;opacity:.85}
+.ratio-badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;white-space:nowrap}
+.rb-high{background:#e8f5e9;color:#1b5e20}
+.rb-mid{background:#fff8e1;color:#e65100}
+.rb-low{background:#fce4ec;color:#b71c1c}
+.rb-over{background:#e3f2fd;color:#0d47a1}
+.footer{padding:10px 16px;font-size:10px;color:#8898a8;background:#fff;border-top:1px solid #eef1f7;line-height:1.6}
+.no-results{padding:40px;text-align:center;color:#aaa;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>📊 大型株 配当利回りダッシュボード</h1></div>
+  <div class="meta">
+    データ取得日: 2026年7月2日<br>
+    現在利回り: 年間配当予想(IRBANK)÷株価 ｜ 10年平均・10年最高: IRBANK（2009〜2025年実績）
+  </div>
+</header>
+<div class="stats-row" id="statsRow"></div>
+<div class="controls">
+  <input class="search" id="search" placeholder="🔍 銘柄名・コードで絞り込み" oninput="render()">
+  <span class="count-badge" id="countBadge">15件</span>
+  <span class="sort-hint">ヘッダークリックでソート</span>
+</div>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th onclick="setSort('code')">コード</th>
+      <th onclick="setSort('name')">銘柄名</th>
+      <th onclick="setSort('ind')">業種</th>
+      <th onclick="setSort('cy')">現在<br>利回り</th>
+      <th onclick="setSort('cy')">利回りバー</th>
+      <th onclick="setSort('avg10y')">過去10年<br>平均利回り</th>
+      <th onclick="setSort('my')">過去10年間<br>最高利回り</th>
+      <th onclick="setSort('myr')">最高年度</th>
+      <th onclick="setSort('ratio')">現在／<br>最高比</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+<div class="no-results" id="noResults" style="display:none">該当する銘柄がありません</div>
+</div>
+<div class="footer">
+  ※ 現在利回りは年間配当予想（IRBANK掲載の会社予想）÷株価（Yahoo Finance）ベース。過去10年平均・過去10年最高はIRBANK掲載の年度別実績データ（概ね2009〜2025年）。<br>
+  ※ バーの赤線=過去10年最高利回りの位置、青線=10年平均の位置。現在利回りが赤線を超えている場合、過去10年最高水準に近い。
+</div>
+<script>
+const RAW = [
+  {code:"8766",name:"東京海上HD",              ind:"保険業",       cy:3.21, my:4.31, myr:"2022年3月",  avg10y:3.71, hist:[{y:"2025年3月期",v:3.16},{y:"2024年3月期",v:3.55},{y:"2023年3月期",v:3.82},{y:"2022年3月期",v:4.31}]},
+  {code:"8058",name:"三菱商事",                ind:"卸売業",       cy:2.74, my:4.13, myr:"2023年3月",  avg10y:3.40, hist:[{y:"2026年3月期",v:3.09},{y:"2025年3月期",v:3.42},{y:"2024年3月期",v:2.94},{y:"2023年3月期",v:4.13}]},
+  {code:"8306",name:"三菱UFJフィナンシャル・グループ", ind:"銀行業", cy:2.89, my:4.09, myr:"2023年3月", avg10y:3.76, hist:[{y:"2026年3月期",v:3.74},{y:"2025年3月期",v:3.75},{y:"2024年3月期",v:3.45},{y:"2023年3月期",v:4.09}]},
+  {code:"9433",name:"KDDI",                    ind:"情報・通信業", cy:3.04, my:3.20, myr:"2023年3月",  avg10y:3.14, hist:[{y:"2026年3月期",v:3.12},{y:"2025年3月期",v:3.09},{y:"2024年3月期",v:3.13},{y:"2023年3月期",v:3.20}]},
+  {code:"8725",name:"MS&ADインシュアランスグループHD", ind:"保険業", cy:3.84, my:4.96, myr:"2020年3月", avg10y:4.12, hist:[{y:"2025年3月期",v:4.42},{y:"2024年3月期",v:4.84},{y:"2023年3月期",v:4.88},{y:"2022年3月期",v:5.01}]},
+  {code:"8031",name:"三井物産",                ind:"卸売業",       cy:2.99, my:4.05, myr:"2023年3月",  avg10y:3.28, hist:[{y:"2026年3月期",v:2.93},{y:"2025年3月期",v:3.02},{y:"2024年3月期",v:3.13},{y:"2023年3月期",v:4.05}]},
+  {code:"8593",name:"三菱HCキャピタル",        ind:"その他金融業", cy:3.76, my:5.13, myr:"2023年3月",  avg10y:4.43, hist:[{y:"2025年3月期",v:3.88},{y:"2024年3月期",v:4.02},{y:"2023年3月期",v:5.13},{y:"2022年3月期",v:4.70}]},
+  {code:"1605",name:"INPEX",                   ind:"鉱業",         cy:3.34, my:4.33, myr:"2025年12月", avg10y:4.22, hist:[{y:"2025年12月期",v:4.33},{y:"2024年12月期",v:3.98},{y:"2023年12月期",v:4.24},{y:"2022年12月期",v:4.31}]},
+  {code:"8750",name:"第一生命HD",              ind:"保険業",       cy:3.94, my:4.51, myr:"2026年3月",  avg10y:3.76, hist:[{y:"2026年3月期",v:4.51},{y:"2025年3月期",v:3.35},{y:"2024年3月期",v:3.83},{y:"2023年3月期",v:3.35}]},
+  {code:"2914",name:"JT",                      ind:"食料品",       cy:3.92, my:7.86, myr:"2022年12月", avg10y:5.95, hist:[{y:"2025年12月期",v:5.10},{y:"2024年12月期",v:4.65},{y:"2023年12月期",v:6.19},{y:"2022年12月期",v:7.86}]},
+  {code:"5108",name:"ブリヂストン",            ind:"ゴム製品",     cy:3.54, my:3.64, myr:"2025年12月", avg10y:3.54, hist:[{y:"2025年12月期",v:3.64},{y:"2024年12月期",v:3.46},{y:"2023年12月期",v:3.58},{y:"2022年12月期",v:3.49}]},
+  {code:"7164",name:"全国保証",                ind:"その他金融業", cy:3.97, my:3.77, myr:"2026年3月",  avg10y:3.50, hist:[{y:"2026年3月期",v:3.77},{y:"2025年3月期",v:3.77},{y:"2024年3月期",v:3.33},{y:"2023年3月期",v:3.11}]},
+  {code:"9432",name:"NTT",                     ind:"情報・通信業", cy:3.66, my:3.42, myr:"2026年3月",  avg10y:3.22, hist:[{y:"2026年3月期",v:3.42},{y:"2025年3月期",v:3.37},{y:"2024年3月期",v:2.97},{y:"2023年3月期",v:3.10}]},
+  {code:"6301",name:"コマツ",                  ind:"機械",         cy:2.94, my:4.59, myr:"2023年3月",  avg10y:4.23, hist:[{y:"2026年3月期",v:3.63},{y:"2025年3月期",v:4.37},{y:"2024年3月期",v:4.33},{y:"2023年3月期",v:4.59}]},
+  {code:"1928",name:"積水ハウス",              ind:"建設業",       cy:4.17, my:4.86, myr:"2019年1月",  avg10y:3.98, hist:[{y:"2026年1月期",v:4.32},{y:"2025年1月期",v:3.75},{y:"2024年1月期",v:4.26},{y:"2023年1月期",v:4.63}]},
+];
+
+const RED_CODES = ['8725','5108','1928'];
+
+RAW.forEach(s => {
+  s.ratioDisplay = s.my > 0 ? Math.round(s.cy / s.my * 100) : null;
+});
+
+const MAX_Y = 8.0;
+
+function yieldClass(v){
+  if(v>=5)   return 'y-5plus';
+  if(v>=4.5) return 'y-45';
+  if(v>=4)   return 'y-4';
+  if(v>=3.5) return 'y-35';
+  if(v>=3)   return 'y-3';
+  return 'y-low';
+}
+function barColor(v){
+  if(v>=5)   return '#00695c';
+  if(v>=4.5) return '#1b7e3a';
+  if(v>=4)   return '#43a047';
+  if(v>=3.5) return '#7cb342';
+  return '#aed581';
+}
+function ratioHTML(r){
+  if(r===null) return '<span style="color:#aaa">—</span>';
+  if(r>=100) return `<span class="ratio-badge rb-over">${r}%</span>`;
+  if(r>=80)  return `<span class="ratio-badge rb-high">${r}%</span>`;
+  if(r>=60)  return `<span class="ratio-badge rb-mid">${r}%</span>`;
+  return `<span class="ratio-badge rb-low">${r}%</span>`;
+}
+
+const colMap = {code:0, name:1, ind:2, cy:3, avg10y:5, my:6, myr:7, ratio:8};
+let sortCol='', sortDir=-1;
+
+function setSort(col){
+  if(sortCol===col) sortDir*=-1;
+  else{sortCol=col; sortDir=-1;}
+  document.querySelectorAll('thead th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));
+  if(col in colMap){
+    document.querySelectorAll('thead th')[colMap[col]].classList.add(sortDir===-1?'sort-desc':'sort-asc');
+  }
+  render();
+}
+
+function render(){
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  let data = RAW.filter(s=>!q || s.code.includes(q) || s.name.toLowerCase().includes(q) || s.ind.includes(q));
+  data.sort((a,b)=>{
+    let va=a[sortCol], vb=b[sortCol];
+    if(['myr','name','code','ind'].includes(sortCol)){va=String(va);vb=String(vb);return sortDir*(va<vb?-1:va>vb?1:0);}
+    va=va??-999; vb=vb??-999;
+    return sortDir*(va-vb);
+  });
+  document.getElementById('countBadge').textContent=`${data.length}件`;
+  document.getElementById('noResults').style.display=data.length?'none':'block';
+
+  const BW = 110;
+  document.getElementById('tbody').innerHTML = data.map(s=>{
+    const fillW   = Math.min(Math.round(s.cy    /MAX_Y*BW), BW);
+    const redPos  = Math.min(Math.round(s.my    /MAX_Y*BW), BW);
+    const bluePos = s.avg10y!=null ? Math.min(Math.round(s.avg10y/MAX_Y*BW), BW) : null;
+    const blueMarker = bluePos!=null
+      ? `<div class="bar-marker-blue" style="left:${bluePos}px" title="10年平均 ${s.avg10y}%"></div>`
+      : '';
+    const redMarker = `<div class="bar-marker-red" style="left:${redPos}px" title="過去10年最高 ${s.my}%"></div>`;
+
+    return `<tr>
+      <td class="td-code">${s.code}</td>
+      <td class="td-name"><a href="https://irbank.net/${s.code}" target="_blank" style="${RED_CODES.includes(s.code)?'color:#e53935':'color:#1a1a2e'}">${s.name}</a></td>
+      <td style="font-size:10px;color:#7090b0;white-space:nowrap">${s.ind}</td>
+      <td><span class="yield-num ${yieldClass(s.cy)}">${s.cy.toFixed(2)}%</span></td>
+      <td class="bar-cell">
+        <div class="bar-bg">
+          <div class="bar-fill" style="width:${fillW}px;background:${barColor(s.cy)}"></div>
+          ${redMarker}${blueMarker}
+        </div>
+      </td>
+      <td><span class="avg-num">${s.avg10y!=null ? s.avg10y.toFixed(2)+'%' : '—'}</span></td>
+      <td><span class="yield-num" style="color:#e53935">${s.my.toFixed(2)}%</span></td>
+      <td style="font-size:11px;color:#666">${s.myr}</td>
+      <td>${ratioHTML(s.ratioDisplay)}</td>
+    </tr>`;
+  }).join('');
+
+  const avg = (RAW.reduce((s,r)=>s+r.cy,0)/RAW.length).toFixed(2);
+  const maxR = RAW.reduce((a,b)=>a.cy>b.cy?a:b);
+  const minR = RAW.reduce((a,b)=>a.cy<b.cy?a:b);
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><div class="lbl">平均利回り</div><div class="val">${avg}%</div></div>
+    <div class="stat"><div class="lbl">最高（${maxR.name}）</div><div class="val">${maxR.cy.toFixed(2)}%</div></div>
+    <div class="stat"><div class="lbl">最低（${minR.name}）</div><div class="val">${minR.cy.toFixed(2)}%</div></div>
+    <div class="stat"><div class="lbl">4%以上</div><div class="val">${RAW.filter(r=>r.cy>=4).length}銘柄</div></div>
+  `;
+}
+
+window.onload = () => setSort('cy');
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){navigator.serviceWorker.register('sw.js');}
+</script>
+</body>
+</html>
