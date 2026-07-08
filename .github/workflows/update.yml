@@ -1,7 +1,7 @@
 name: Update dividend yields
 on:
   schedule:
-    - cron: '10 0 * * *'   # 毎日 09:10 JST (00:10 UTC)
+    - cron: '13 0 * * *'   # 毎日 09:13 JST (00:13 UTC)
   workflow_dispatch:
 permissions:
   contents: write
