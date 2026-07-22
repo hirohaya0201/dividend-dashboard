@@ -39,13 +39,35 @@ def strip_tags(raw):
     return htmllib.unescape(text)
 
 
+def parse_market_cap(raw_html):
+    """IRBANK銘柄トップページの生HTMLから時価総額[億円]を取得。失敗時 None。"""
+    m = re.search(r"<dt>\u6642\u4fa1\u7dcf\u984d</dt>\s*<dd>([^<]+)</dd>", raw_html)
+    if not m:
+        return None
+    s = m.group(1)
+    cho = re.search(r"([\d]+)\u5146", s)
+    oku = re.search(r"([\d]+)\u5104", s)
+    man = re.search(r"([\d]+)\u4e07", s)
+    if not (cho or oku or man):
+        return None
+    total = 0.0
+    if cho:
+        total += int(cho.group(1)) * 10000
+    if oku:
+        total += int(oku.group(1))
+    if man:
+        total += int(man.group(1)) / 10000
+    return round(total, 2)
+
+
 def get_dividend_from_irbank(code):
-    """IRBANKから (年間配当予想[円], IRBANK予想利回り[%]) を取得。失敗時は (None, None)。"""
+    """IRBANKから (年間配当予想[円], IRBANK予想利回り[%], 時価総額[億円]) を取得。失敗時は (None, None, None)。"""
     try:
         top = fetch(f"https://irbank.net/{code}")
     except (URLError, HTTPError, OSError) as e:
         print(f"  [WARN] {code}: irbank top fetch failed: {e}")
-        return None, None
+        return None, None, None
+    cap = parse_market_cap(top)
     m = re.search(r'href="/(E\d+)/dividend"', top)
     text = None
     if m:
@@ -72,7 +94,7 @@ def get_dividend_from_irbank(code):
     m2 = re.search(r"配当[\s\|]*予[\s\|]+([\d.]+)%", text)
     if m2:
         ir_yield = float(m2.group(1))
-    return div_total, ir_yield
+    return div_total, ir_yield, cap
 
 
 def get_price(code):
@@ -123,10 +145,17 @@ def main():
         ent = cache.get(c)
         if ent and ent.get("asof", "") >= cutoff and ent.get("div"):
             continue
-        div, ir_y = get_dividend_from_irbank(c)
-        if div or ir_y:
-            cache[c] = {"div": div, "irbank_yield": ir_y, "asof": now.strftime("%Y-%m-%d")}
-            print(f"  {c}: 配当予想 {div}円 / IRBANK利回り {ir_y}%")
+        div, ir_y, cap = get_dividend_from_irbank(c)
+        if div or ir_y or cap:
+            cache[c] = {"div": div, "irbank_yield": ir_y, "cap": cap, "asof": now.strftime("%Y-%m-%d")}
+            print(f"  {c}: 配当予想 {div}円 / IRBANK利回り {ir_y}% / 時価総額 {cap}億円")
+            if cap is not None:
+                for rel in DASHBOARDS:
+                    docs[rel] = re.sub(
+                        r'(\{code:"%s"[^\n]*?cap:)([\d.]+)' % c,
+                        lambda m: f"{m.group(1)}{cap:.2f}",
+                        docs[rel],
+                    )
         else:
             print(f"  [WARN] {c}: 配当情報の取得失敗（既存キャッシュ使用）")
         time.sleep(0.7)
