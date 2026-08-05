@@ -25,6 +25,16 @@ DIV_CACHE = os.path.join(ROOT, "data", "dividends.json")
 SUMMARY = os.path.join(ROOT, "data", "last_update.json")
 CACHE_DAYS = 7
 YIELD_MIN, YIELD_MAX = 0.1, 15.0
+# 株式分割によるキャッシュ汚染の検知しきい値。計算利回りがIRBANK掲載の
+# 予想利回りのこの倍率を超えたら、キャッシュの配当額が分割前の値とみなす。
+SPLIT_GUARD_RATIO = 1.8
+
+# IRBANK配当表の1行。列は 年度 | 区分 | 中間 | 期末 | 合計 | 分割調整 | 配当利回り% | 備考。
+# 年度セルは年グループの先頭行にしか存在しないため、年度と明細行を別々に拾う。
+ROW_RE = re.compile(
+    r"(?P<year>(?P<y>\d{4})年[\s\|]*(?P<mo>\d{1,2})月)"
+    r"|(?:(?:予想|修正|実績)(?P<nums>(?:[\s\|]+(?:[\d.]+|-)){3,5})[\s\|]+[\d.]+%)"
+)
 
 
 def fetch(url, timeout=30):
@@ -79,16 +89,21 @@ def get_dividend_from_irbank(code):
     if text is None:
         text = strip_tags(top)
 
-    div_total, best_key = None, -1
-    # 行形式: 2027年 3月 | 予想 | 中間 | 期末 | 合計 | 利回り%
-    for y, mo, kind, _mid, _fin, total, _yld in re.findall(
-        r"(\d{4})年[\s\|]*(\d{1,2})月[^\|]*[\s\|]+(予想|修正|実績)[\s\|]+([\d.]+|-)[\s\|]+([\d.]+|-)[\s\|]+([\d.]+)[\s\|]+([\d.]+)%",
-        text,
-    ):
-        key = int(y) * 12 + int(mo)
-        if key >= best_key:
-            best_key = key
-            div_total = float(total)
+    # 直近年度の「合計」を年間配当とする。分割調整列は現在の株数基準と一致しない
+    # ことがあるため使わず、合計（3番目の数値列）を採用する。
+    div_total, best_key, cur_key = None, -1, -1
+    for m in ROW_RE.finditer(text):
+        if m.group("year"):
+            cur_key = int(m.group("y")) * 12 + int(m.group("mo"))
+            continue
+        if cur_key < 0:
+            continue
+        nums = re.findall(r"[\d.]+|-", m.group("nums"))
+        if len(nums) < 3 or nums[2] == "-":
+            continue
+        if cur_key >= best_key:
+            best_key = cur_key
+            div_total = float(nums[2])
 
     ir_yield = None
     m2 = re.search(r"配当[\s\|]*予[\s\|]+([\d.]+)%", text)
@@ -169,6 +184,13 @@ def main():
         if price and ent.get("div"):
             cy = round(ent["div"] / price * 100, 2)
             reason = f"div {ent['div']} / {src} price {price}"
+            # 株式分割後もキャッシュの配当額が分割前のままだと利回りが数倍に跳ねる。
+            # IRBANK掲載の予想利回りと大きく乖離したら、そちらを採用する。
+            iry = ent.get("irbank_yield")
+            if iry and cy > max(iry * SPLIT_GUARD_RATIO, iry + 1.0):
+                print(f"  [FIX] {c}: 計算値 {cy}% がIRBANK値 {iry}% を大幅超過 → IRBANK値を採用")
+                cy = iry
+                reason = f"irbank yield {iry} (cache div {ent['div']} は乖離のため不採用)"
         elif ent.get("irbank_yield"):
             cy = ent["irbank_yield"]
             reason = "irbank yield fallback"
