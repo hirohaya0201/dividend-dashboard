@@ -20,7 +20,7 @@ from urllib.error import URLError, HTTPError
 JST = timezone(timedelta(hours=9))
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DASHBOARDS = ["d1/index.html", "d2/index.html"]
+DASHBOARDS = ["d1/index.html"]
 DIV_CACHE = os.path.join(ROOT, "data", "dividends.json")
 SUMMARY = os.path.join(ROOT, "data", "last_update.json")
 CACHE_DAYS = 7
