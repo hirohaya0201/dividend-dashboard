@@ -63,6 +63,15 @@ td{padding:7px 10px;vertical-align:middle}
 .rb-over{background:#e3f2fd;color:#0d47a1}
 .footer{padding:10px 16px;font-size:10px;color:#8898a8;background:#fff;border-top:1px solid #eef1f7;line-height:1.6}
 .no-results{padding:40px;text-align:center;color:#aaa;font-size:14px}
+.chk-cell{width:34px;text-align:center;padding:7px 6px}
+.chk-cell input{width:15px;height:15px;cursor:pointer;accent-color:#e53935;margin:0}
+thead th.chk-cell{text-align:center}
+tbody tr.marked,tbody tr.marked:nth-child(even){background:#fdecea}
+tbody tr.marked:hover,tbody tr.marked:nth-child(even):hover{background:#fbd9d4}
+.mark-count{font-size:11px;font-weight:600;color:#b71c1c;background:#fdecea;padding:4px 8px;border-radius:10px}
+.btn{font-size:11px;padding:5px 10px;border:1px solid #c8d4e8;border-radius:5px;background:#fff;color:#1a1a2e;cursor:pointer}
+.btn:hover{background:#f0f4fa}
+.btn.on{background:#e53935;border-color:#e53935;color:#fff}
 </style>
 </head>
 <body>
@@ -77,12 +86,16 @@ td{padding:7px 10px;vertical-align:middle}
 <div class="controls">
   <input class="search" id="search" placeholder="🔍 銘柄名・コードで絞り込み" oninput="render()">
   <span class="count-badge" id="countBadge">33件</span>
+  <span class="mark-count" id="markCount">選択 0件</span>
+  <button class="btn" id="onlyMarkedBtn" onclick="toggleOnlyMarked()">チェックのみ表示</button>
+  <button class="btn" onclick="clearMarks()">一括解除</button>
   <span class="sort-hint">ヘッダークリックでソート</span>
 </div>
 <div class="table-wrap">
 <table>
   <thead>
     <tr>
+      <th class="chk-cell" onclick="setSort('mark')" title="チェック済みでソート">✓</th>
       <th onclick="setSort('code')">コード</th>
       <th onclick="setSort('name')">銘柄名</th>
       <th onclick="setSort('cap')">時価総額</th>
@@ -147,13 +160,25 @@ function yieldClass(v){if(v>=5)return 'y-5plus';if(v>=4.5)return 'y-45';if(v>=4)
 function barColor(v){if(v>=5)return '#00695c';if(v>=4.5)return '#1b7e3a';if(v>=4)return '#43a047';if(v>=3.5)return '#7cb342';return '#aed581';}
 function formatCap(v){if(v==null)return '—';if(v>=10000)return (v/10000).toFixed(2)+'兆円';return Math.round(v).toLocaleString()+'億円';}
 function ratioHTML(r){if(r===null)return '<span style="color:#aaa">—</span>';if(r>=100)return `<span class="ratio-badge rb-over">${r}%</span>`;if(r>=80)return `<span class="ratio-badge rb-high">${r}%</span>`;if(r>=60)return `<span class="ratio-badge rb-mid">${r}%</span>`;return `<span class="ratio-badge rb-low">${r}%</span>`;}
-const colMap={code:0,name:1,cap:2,ind:3,cy:4,avg10y:6,my:7,myr:8,ratio:9};
+const colMap={mark:0,code:1,name:2,cap:3,ind:4,cy:5,avg10y:7,my:8,myr:9,ratio:10};
+const MARK_KEY='dividend-dashboard-d1-marked';
+let MARKED=new Set();
+try{MARKED=new Set(JSON.parse(localStorage.getItem(MARK_KEY)||'[]'));}catch(e){}
+let onlyMarked=false;
+function saveMarks(){try{localStorage.setItem(MARK_KEY,JSON.stringify([...MARKED]));}catch(e){}}
+function updateMarkUI(){const el=document.getElementById('markCount');if(el)el.textContent=`選択 ${MARKED.size}件`;}
+function toggleMark(code,el){if(el.checked)MARKED.add(code);else MARKED.delete(code);saveMarks();
+if(onlyMarked||sortCol==='mark'){render();return;}
+el.closest('tr').classList.toggle('marked',el.checked);updateMarkUI();}
+function clearMarks(){if(!MARKED.size)return;MARKED.clear();saveMarks();render();}
+function toggleOnlyMarked(){onlyMarked=!onlyMarked;document.getElementById('onlyMarkedBtn').classList.toggle('on',onlyMarked);render();}
 let sortCol='',sortDir=-1;
 function setSort(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=-1;}document.querySelectorAll('thead th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));if(col in colMap){document.querySelectorAll('thead th')[colMap[col]].classList.add(sortDir===-1?'sort-desc':'sort-asc');}render();}
 function render(){
 const q=(document.getElementById('search').value||'').toLowerCase();
 let data=RAW.filter(s=>!q||s.code.includes(q)||s.name.toLowerCase().includes(q)||s.ind.includes(q));
-data.sort((a,b)=>{let va=a[sortCol],vb=b[sortCol];if(['myr','name','code','ind'].includes(sortCol)){va=String(va);vb=String(vb);return sortDir*(va<vb?-1:va>vb?1:0);}va=va??-999;vb=vb??-999;return sortDir*(va-vb);});
+if(onlyMarked)data=data.filter(s=>MARKED.has(s.code));
+data.sort((a,b)=>{if(sortCol==='mark'){const x=MARKED.has(a.code)?1:0,y=MARKED.has(b.code)?1:0;return sortDir*(x-y)||(a.code<b.code?-1:1);}let va=a[sortCol],vb=b[sortCol];if(['myr','name','code','ind'].includes(sortCol)){va=String(va);vb=String(vb);return sortDir*(va<vb?-1:va>vb?1:0);}va=va??-999;vb=vb??-999;return sortDir*(va-vb);});
 document.getElementById('countBadge').textContent=`${data.length}件`;
 document.getElementById('noResults').style.display=data.length?'none':'block';
 const BW=110;
@@ -163,7 +188,8 @@ const redPos=Math.min(Math.round(s.my/MAX_Y*BW),BW);
 const bluePos=s.avg10y!=null?Math.min(Math.round(s.avg10y/MAX_Y*BW),BW):null;
 const blueMarker=bluePos!=null?`<div class="bar-marker-blue" style="left:${bluePos}px" title="10年平均 ${s.avg10y}%"></div>`:'';
 const redMarker=`<div class="bar-marker-red" style="left:${redPos}px" title="過去10年最高 ${s.my}%"></div>`;
-return `<tr>
+return `<tr class="${MARKED.has(s.code)?'marked':''}">
+<td class="chk-cell"><input type="checkbox" ${MARKED.has(s.code)?'checked':''} onchange="toggleMark('${s.code}',this)"></td>
 <td class="td-code">${s.code}</td>
 <td class="td-name"><a href="https://irbank.net/${s.code}" target="_blank" style="color:#1a1a2e">${s.name}</a></td>
 <td class="cap-num">${formatCap(s.cap)}</td>
@@ -176,6 +202,7 @@ return `<tr>
 <td>${ratioHTML(s.ratioDisplay)}</td>
 </tr>`;
 }).join('');
+updateMarkUI();
 const avg=(RAW.reduce((s,r)=>s+r.cy,0)/RAW.length).toFixed(2);
 const maxR=RAW.reduce((a,b)=>a.cy>b.cy?a:b);
 const minR=RAW.reduce((a,b)=>a.cy<b.cy?a:b);
