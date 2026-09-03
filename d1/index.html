@@ -142,7 +142,6 @@ const RAW = [
   {code:"4290",name:"プレステージ・インターナショナル", cap:848.27, ind:"サービス業", cy:3.99, my:3.90, myr:"2026年3月", avg10y:2.75, hist:[{y:"2026年3月期",v:3.90},{y:"2025年3月期",v:3.47},{y:"2024年3月期",v:1.97},{y:"2023年3月期",v:1.64}]},
 ];
 RAW.forEach(s=>{s.ratioDisplay=s.my>0?Math.round(s.cy/s.my*100):null;});
-const RED_CODES = ['4540','8130','3231','6345','7989','4290','4674','3901','9364','7723'];
 const MAX_Y=8.0;
 function yieldClass(v){if(v>=5)return 'y-5plus';if(v>=4.5)return 'y-45';if(v>=4)return 'y-4';if(v>=3.5)return 'y-35';if(v>=3)return 'y-3';return 'y-low';}
 function barColor(v){if(v>=5)return '#00695c';if(v>=4.5)return '#1b7e3a';if(v>=4)return '#43a047';if(v>=3.5)return '#7cb342';return '#aed581';}
@@ -164,7 +163,7 @@ const redPos=Math.min(Math.round(s.my/MAX_Y*BW),BW);
 const bluePos=s.avg10y!=null?Math.min(Math.round(s.avg10y/MAX_Y*BW),BW):null;
 const blueMarker=bluePos!=null?`<div class="bar-marker-blue" style="left:${bluePos}px" title="10年平均 ${s.avg10y}%"></div>`:'';
 const redMarker=`<div class="bar-marker-red" style="left:${redPos}px" title="過去10年最高 ${s.my}%"></div>`;
-return `<tr style="${RED_CODES.includes(s.code)?'background:#fdecea':''}">
+return `<tr>
 <td class="td-code">${s.code}</td>
 <td class="td-name"><a href="https://irbank.net/${s.code}" target="_blank" style="color:#1a1a2e">${s.name}</a></td>
 <td class="cap-num">${formatCap(s.cap)}</td>
