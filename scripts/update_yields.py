@@ -17,6 +17,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UA = {"User-Agent": "Mozilla/5.0"}
 with open(os.path.join(ROOT, "data/dividend_adjustments.json"), encoding="utf-8") as file:
     DIVIDEND_ADJUSTMENTS = json.load(file)
+with open(os.path.join(ROOT, "data/dividend_reviews.json"), encoding="utf-8") as file:
+    DIVIDEND_REVIEWS = json.load(file)
 
 
 def rounded(value):
@@ -157,9 +159,17 @@ def parse_yahoo(raw):
 
 
 def calculation_dividend(code, reported, period):
+    review = DIVIDEND_REVIEWS.get(code)
+    # Recheck every stock when the forecast or fiscal period changes, including
+    # stocks that currently have no one-off dividend. Quote-only updates continue.
+    if not review or review["period"] != period or abs(
+            Decimal(str(reported)) - Decimal(str(review["reported_div"]))) >= Decimal("0.01"):
+        raise ValueError(f"Dividend basis needs review: {code} {period} forecast={reported}")
     adjustment = DIVIDEND_ADJUSTMENTS.get(code)
-    if not adjustment or adjustment["period"] != period:
+    if not adjustment:
         return reported, ""
+    if adjustment["period"] != period or adjustment["calculation_div"] != review["calculation_div"]:
+        raise ValueError(f"Dividend adjustment and review disagree: {code}")
     # A revised forecast needs a fresh check of its nonrecurring component.
     if abs(Decimal(str(reported)) - Decimal(str(adjustment["reported_div"]))) >= Decimal("0.01"):
         raise ValueError(f"Dividend adjustment needs review: {code} {period} forecast={reported}")
@@ -178,6 +188,7 @@ def get_stock(code):
     dividend = dividend if abs(dividend - yahoo["div"]) < .01 else yahoo["div"]
     reported_dividend = dividend
     dividend, dividend_note = calculation_dividend(code, dividend, yahoo["div_period"])
+    review = DIVIDEND_REVIEWS[code]
     current = rounded(Decimal(str(dividend)) / Decimal(str(price)) * 100)
     if not 0.1 <= current <= 15:
         raise ValueError(f"Unexpected current yield: {current}")
@@ -187,12 +198,16 @@ def get_stock(code):
             "my": highest["v"], "myr": highest["y"].removesuffix("期"),
             "hist": list(reversed(history)), "historyPeriod": history[0]["y"] + "〜" + history[-1]["y"],
             "quoteAt": quote_at.isoformat(), "quoteSource": source, "price": price, "div": dividend,
-            "shares": yahoo["shares"], "divSource": "Yahoo Finance"}
+            "shares": yahoo["shares"], "divSource": review["source"],
+            "divPeriod": yahoo["div_period"], "divReviewAt": review["reviewed_at"],
+            "divReviewNote": review["note"]}
     if dividend_note:
         data.update({"reportedDiv": reported_dividend, "divPeriod": yahoo["div_period"],
                      "divNote": dividend_note, "divSource": DIVIDEND_ADJUSTMENTS[code]["source"]})
     cache = {"div": dividend, "irbank_yield": rounded(Decimal(str(dividend)) / Decimal(str(top["close"])) * 100),
-             "cap": data["cap"], "shares": yahoo["shares"], "div_source": "Yahoo Finance",
+             "cap": data["cap"], "shares": yahoo["shares"], "div_source": data["divSource"],
+             "div_period": yahoo["div_period"], "div_review_at": review["reviewed_at"],
+             "div_review_note": review["note"],
              "asof": datetime.now(JST).strftime("%Y-%m-%d")}
     if dividend_note:
         cache.update({"reported_div": reported_dividend, "div_period": yahoo["div_period"],

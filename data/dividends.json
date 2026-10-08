@@ -5,7 +5,10 @@
   "cap": 156.46,
   "asof": "2026-10-08",
   "shares": 6266000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.zaohnet.co.jp/wp-content/uploads/09986_20260810.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "前年の記念配当5円は当期予想に含まれない。普通配当100円を使用。"
  },
  "3076": {
   "div": 140,
@@ -13,7 +16,10 @@
   "cap": 1680.17,
   "asof": "2026-10-08",
   "shares": 56590410,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.aiholdings.co.jp/ir/stock_info/",
+  "div_period": "2027/06",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "前年以前の特別配当は当期予想に含まれない。中間70円・期末70円。"
  },
  "8130": {
   "div": 155,
@@ -21,7 +27,10 @@
   "cap": 1844.08,
   "asof": "2026-10-08",
   "shares": 59200000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260806/20260805509936.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "2659": {
   "div": 110,
@@ -29,7 +38,10 @@
   "cap": 1976.47,
   "asof": "2026-10-08",
   "shares": 63963308,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20261006/20261005545888.pdf",
+  "div_period": "2027/02",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "前年の株式公開25周年記念配当25円は当期予想に含まれない。普通配当110円を使用。"
  },
  "3333": {
   "div": 50,
@@ -37,7 +49,10 @@
   "cap": 321.45,
   "asof": "2026-10-08",
   "shares": 26240800,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://corporate.cb-asahi.co.jp/ir/library/EXPLANATORY-MATERIAL-ON-FINANCIAL-RESULTS-FOR-THE-FISCAL-YEAR-ENDED-FEBRUARY-20-2026_ja.pdf",
+  "div_period": "2027/02",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "4008": {
   "div": 70,
@@ -45,7 +60,10 @@
   "cap": 958.34,
   "asof": "2026-10-08",
   "shares": 64709285,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260806/20260806511225.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "DOE4.5%以上を目標とする配当方針への変更による増配。記念・特別配当の明示なし。"
  },
  "4097": {
   "div": 40,
@@ -53,7 +71,10 @@
   "cap": 651.92,
   "asof": "2026-10-08",
   "shares": 55577526,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.koatsugas.co.jp/catalogue/ir/r9_1qtan.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "4958": {
   "div": 100,
@@ -61,7 +82,10 @@
   "cap": 1420.05,
   "asof": "2026-10-08",
   "shares": 42708154,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.t-hasegawa.co.jp/ir/shareholders",
+  "div_period": "2026/09",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "DOE3%を目安とする配当方針に基づく年間100円。記念・特別配当の明示なし。"
  },
  "3844": {
   "div": 52,
@@ -69,15 +93,23 @@
   "cap": 401.09,
   "asof": "2026-10-08",
   "shares": 32241600,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.comture.com/ir/irdata/cashdividend.html",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "8725": {
-  "div": 170,
-  "irbank_yield": 3.5,
+  "div": 140,
+  "irbank_yield": 2.88,
   "cap": 72120.1,
   "asof": "2026-10-08",
   "shares": 1492551732,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://data.swcms.net/file/corp-ms-ad-hd/dam/jcr:5b562e47-5418-4b70-81c8-44fccaba5ddb/140120260508519047.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "2027年3月期の特別配当30円（中間15円・期末15円）を除外し、普通配当140円を使用（170円−30円＝140円）",
+  "reported_div": 170,
+  "div_note": "2027年3月期の特別配当30円（中間15円・期末15円）を除外し、普通配当140円を使用（170円−30円＝140円）"
  },
  "6785": {
   "div": 112,
@@ -85,7 +117,10 @@
   "cap": 509.2,
   "asof": "2026-10-08",
   "shares": 14404400,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260810/20260810516635.pdf",
+  "div_period": "2027/06",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "DOE4%または配当性向50%を目安とする配当方針に基づく年間112円。記念・特別配当の明示なし。"
  },
  "7723": {
   "div": 120,
@@ -93,7 +128,10 @@
   "cap": 434.23,
   "asof": "2026-10-08",
   "shares": 15420000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.aichitokei.co.jp/ir/kojin/shareholder_return/",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "会社資料に普通配当120円と明記。当期の記念・特別配当なし。"
  },
  "3231": {
   "div": 44,
@@ -101,7 +139,10 @@
   "cap": 7728.16,
   "asof": "2026-10-08",
   "shares": 917942685,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.nomura-re-hd.co.jp/ir/stock-information/dividend.html",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "3003": {
   "div": 67,
@@ -109,7 +150,10 @@
   "cap": 12697.35,
   "asof": "2026-10-08",
   "shares": 767907735,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260728/20260727500129.pdf",
+  "div_period": "2026/12",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "2169": {
   "div": 74,
@@ -117,7 +161,10 @@
   "cap": 120.9,
   "asof": "2026-10-08",
   "shares": 6924400,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www2.jpx.co.jp/disc/21690/140120260506517249.pdf",
+  "div_period": "2026/12",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "9757": {
   "div": 48,
@@ -125,7 +172,10 @@
   "cap": 1157.0,
   "asof": "2026-10-08",
   "shares": 100000000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260807/20260806513597.pdf",
+  "div_period": "2026/12",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "2分割後の年間48円。記念・特別配当の明示なし。"
  },
  "9769": {
   "div": 127,
@@ -133,7 +183,10 @@
   "cap": 272.56,
   "asof": "2026-10-08",
   "shares": 10968356,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.gakkyusha.com/wp-content/uploads/2026/06/f3137ff90dc418088c16f0c8fce466a6.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "複数年の株主還元計画による年間127円。記念・特別配当の明示なし。"
  },
  "4641": {
   "div": 36,
@@ -141,7 +194,10 @@
   "cap": 535.26,
   "asof": "2026-10-08",
   "shares": 62240025,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.alpsgiken.co.jp/ir/ir/index.html",
+  "div_period": "2026/12",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "過去の創業55周年記念配当は当期予想に含まれない。108円を3分割後の36円に換算。"
  },
  "3817": {
   "div": 220,
@@ -149,7 +205,10 @@
   "cap": 707.9,
   "asof": "2026-10-08",
   "shares": 15240000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.sra-hd.co.jp/Portals/0/ir/corporate_exp/setsumei260520.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "中間100円・期末120円。配当性向50%を目途とする通常の配当計画。"
  },
  "3901": {
   "div": 58,
@@ -157,15 +216,23 @@
   "cap": 198.7,
   "asof": "2026-10-08",
   "shares": 13228800,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.marklines.com/en/release/img/20260515_02_en.pdf",
+  "div_period": "2026/12",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "配当性向45%への方針変更による年間58円。記念・特別配当の明示なし。"
  },
  "4674": {
-  "div": 80.0,
-  "irbank_yield": 1.82,
+  "div": 70,
+  "irbank_yield": 3.63,
   "cap": 795.06,
   "asof": "2026-10-08",
   "shares": 42000000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.cresco.co.jp/ja/ir/stockholder/dividend/main/04/teaserItems1/0/linkList/01115/link/260731_ir.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "2027年3月期の上場30周年記念配当10円を除外（80円−10円＝70円）",
+  "reported_div": 80.0,
+  "div_note": "2027年3月期の上場30周年記念配当10円を除外（80円−10円＝70円）"
  },
  "4746": {
   "div": 43.25,
@@ -176,7 +243,9 @@
   "div_source": "https://www.toukei.co.jp/wp-content/uploads/2026/08/260803-ir-finance.pdf",
   "reported_div": 119.125,
   "div_period": "2026/12",
-  "div_note": "2026年12月期の有価証券売却による増配を除外し、増配前予想173円を4分割後に換算（173円÷4＝43.25円）。会社公表の普通配当区分ではなく増配前予想を使用"
+  "div_note": "2026年12月期の有価証券売却による増配を除外し、増配前予想173円を4分割後に換算（173円÷4＝43.25円）。会社公表の普通配当区分ではなく増配前予想を使用",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "2026年12月期の有価証券売却による増配を除外し、増配前予想173円を4分割後に換算（173円÷4＝43.25円）。会社公表の普通配当区分ではなく増配前予想を使用"
  },
  "2003": {
   "div": 70,
@@ -184,7 +253,10 @@
   "cap": 688.84,
   "asof": "2026-10-08",
   "shares": 37538912,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260803/20260803506339.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "累進配当方針による年間280円を4分割後の70円に換算。記念・特別配当の明示なし。"
  },
  "1928": {
   "div": 145,
@@ -192,7 +264,10 @@
   "cap": 21626.12,
   "asof": "2026-10-08",
   "shares": 651585566,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.sekisuihouse.co.jp/company/financial/holders/kangen/",
+  "div_period": "2027/01",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "6345": {
   "div": 65,
@@ -200,7 +275,10 @@
   "cap": 909.15,
   "asof": "2026-10-08",
   "shares": 64570000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.aichi-corp.co.jp/hubfs/aichi-corp.co.jp/files/news/2026/07/statement_of_accounts_2026_1.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "9364": {
   "div": 205,
@@ -208,7 +286,10 @@
   "cap": 4978.2,
   "asof": "2026-10-08",
   "shares": 106576837,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260813/20260813518854.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "9381": {
   "div": 110,
@@ -216,7 +297,10 @@
   "cap": 517.01,
   "asof": "2026-10-08",
   "shares": 23913600,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.ait-jp.com/docs/ir/library/202607151200001.pdf",
+  "div_period": "2027/02",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "7989": {
   "div": 120,
@@ -224,7 +308,10 @@
   "cap": 529.06,
   "asof": "2026-10-08",
   "shares": 20763600,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.blind.co.jp/shared/news/data/kessan_setsumei_26_02.pdf",
+  "div_period": "2026/12",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "中期経営計画のDOE4%以上・累進配当方針に基づく年間120円。記念・特別配当の明示なし。"
  },
  "7994": {
   "div": 105,
@@ -232,7 +319,10 @@
   "cap": 2179.45,
   "asof": "2026-10-08",
   "shares": 100621021,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260807/20260807513840.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "4540": {
   "div": 158,
@@ -240,7 +330,10 @@
   "cap": 2863.85,
   "asof": "2026-10-08",
   "shares": 76758362,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260806/20260806511803.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "DOE5%を目安とする配当方針に基づく年間158円。記念・特別配当の明示なし。"
  },
  "5108": {
   "div": 125,
@@ -248,7 +341,10 @@
   "cap": 49679.69,
   "asof": "2026-10-08",
   "shares": 1291387942,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.bridgestone.co.jp/ir/financialdata/forecasts/",
+  "div_period": "2026/12",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "9989": {
   "div": 132,
@@ -256,7 +352,10 @@
   "cap": 4208.81,
   "asof": "2026-10-08",
   "shares": 119331184,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260814/20260813519880.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "4206": {
   "div": 144,
@@ -264,7 +363,10 @@
   "cap": 2904.37,
   "asof": "2026-10-08",
   "shares": 67590664,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.aica.co.jp/company/ir/files/pdf/20260804_dividend.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "2026年8月4日発表の業績好調・累進配当方針による144円。記念・特別配当の明示なし。"
  },
  "5982": {
   "div": 125,
@@ -272,7 +374,10 @@
   "cap": 786.26,
   "asof": "2026-10-08",
   "shares": 19780000,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.maruzen-kitchen.co.jp/toushika/PDF/M202702Q1tan.pdf",
+  "div_period": "2027/02",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。"
  },
  "4290": {
   "div": 28,
@@ -280,7 +385,10 @@
   "cap": 849.05,
   "asof": "2026-10-08",
   "shares": 127293300,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.prestigein.com/IR/stock/stock_dividends.html",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "株主還元方針に基づく年間28円。周年記念の株主優待は配当金に含めない。"
  },
  "2815": {
   "div": 180,
@@ -291,7 +399,9 @@
   "div_source": "https://www.ariakejapan.com/ja/ir/news/auto_20260512527208/pdfFile.pdf",
   "reported_div": 300,
   "div_period": "2027/03",
-  "div_note": "2027年3月期の創業60周年記念配当120円を除外（300円−120円＝180円）"
+  "div_note": "2027年3月期の創業60周年記念配当120円を除外（300円−120円＝180円）",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "2027年3月期の創業60周年記念配当120円を除外（300円−120円＝180円）"
  },
  "4362": {
   "div": 104,
@@ -299,6 +409,9 @@
   "cap": 659.88,
   "asof": "2026-10-08",
   "shares": 23822447,
-  "div_source": "Yahoo Finance"
+  "div_source": "https://www.nipponseika.co.jp/nfc/wp-content/uploads/2026/05/2026年3月期決算説明会資料_20260514.pdf",
+  "div_period": "2027/03",
+  "div_review_at": "2026-10-08",
+  "div_review_note": "DOE4.3%を目安とする株主還元方針に基づく年間104円。記念・特別配当の明示なし。"
  }
 }

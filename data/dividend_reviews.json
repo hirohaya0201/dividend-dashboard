@@ -1,0 +1,372 @@
+{
+ "9986": {
+  "name": "蔵王産業",
+  "period": "2027/03",
+  "reported_div": 100,
+  "calculation_div": 100,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "前年の記念配当5円は当期予想に含まれない。普通配当100円を使用。",
+  "source": "https://www.zaohnet.co.jp/wp-content/uploads/09986_20260810.pdf"
+ },
+ "3076": {
+  "name": "あいHD",
+  "period": "2027/06",
+  "reported_div": 140,
+  "calculation_div": 140,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "前年以前の特別配当は当期予想に含まれない。中間70円・期末70円。",
+  "source": "https://www.aiholdings.co.jp/ir/stock_info/"
+ },
+ "8130": {
+  "name": "サンゲツ",
+  "period": "2027/03",
+  "reported_div": 155,
+  "calculation_div": 155,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260806/20260805509936.pdf"
+ },
+ "2659": {
+  "name": "サンエー",
+  "period": "2027/02",
+  "reported_div": 110,
+  "calculation_div": 110,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "前年の株式公開25周年記念配当25円は当期予想に含まれない。普通配当110円を使用。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20261006/20261005545888.pdf"
+ },
+ "3333": {
+  "name": "あさひ",
+  "period": "2027/02",
+  "reported_div": 50,
+  "calculation_div": 50,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://corporate.cb-asahi.co.jp/ir/library/EXPLANATORY-MATERIAL-ON-FINANCIAL-RESULTS-FOR-THE-FISCAL-YEAR-ENDED-FEBRUARY-20-2026_ja.pdf"
+ },
+ "4008": {
+  "name": "住友精化",
+  "period": "2027/03",
+  "reported_div": 70,
+  "calculation_div": 70,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "DOE4.5%以上を目標とする配当方針への変更による増配。記念・特別配当の明示なし。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260806/20260806511225.pdf"
+ },
+ "4097": {
+  "name": "高圧ガス工業",
+  "period": "2027/03",
+  "reported_div": 40,
+  "calculation_div": 40,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.koatsugas.co.jp/catalogue/ir/r9_1qtan.pdf"
+ },
+ "4958": {
+  "name": "長谷川香料",
+  "period": "2026/09",
+  "reported_div": 100,
+  "calculation_div": 100,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "DOE3%を目安とする配当方針に基づく年間100円。記念・特別配当の明示なし。",
+  "source": "https://www.t-hasegawa.co.jp/ir/shareholders"
+ },
+ "8725": {
+  "name": "MS&ADインシュアランスグループHD",
+  "period": "2027/03",
+  "reported_div": 170,
+  "calculation_div": 140,
+  "excluded_div": 30.0,
+  "reviewed_at": "2026-10-08",
+  "note": "2027年3月期の特別配当30円（中間15円・期末15円）を除外し、普通配当140円を使用（170円−30円＝140円）",
+  "source": "https://data.swcms.net/file/corp-ms-ad-hd/dam/jcr:5b562e47-5418-4b70-81c8-44fccaba5ddb/140120260508519047.pdf"
+ },
+ "6785": {
+  "name": "鈴木",
+  "period": "2027/06",
+  "reported_div": 112,
+  "calculation_div": 112,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "DOE4%または配当性向50%を目安とする配当方針に基づく年間112円。記念・特別配当の明示なし。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260810/20260810516635.pdf"
+ },
+ "7723": {
+  "name": "愛知時計電機",
+  "period": "2027/03",
+  "reported_div": 120,
+  "calculation_div": 120,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "会社資料に普通配当120円と明記。当期の記念・特別配当なし。",
+  "source": "https://www.aichitokei.co.jp/ir/kojin/shareholder_return/"
+ },
+ "3231": {
+  "name": "野村不動産HD",
+  "period": "2027/03",
+  "reported_div": 44,
+  "calculation_div": 44,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.nomura-re-hd.co.jp/ir/stock-information/dividend.html"
+ },
+ "3003": {
+  "name": "ヒューリック",
+  "period": "2026/12",
+  "reported_div": 67,
+  "calculation_div": 67,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260728/20260727500129.pdf"
+ },
+ "2169": {
+  "name": "CDS",
+  "period": "2026/12",
+  "reported_div": 74,
+  "calculation_div": 74,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www2.jpx.co.jp/disc/21690/140120260506517249.pdf"
+ },
+ "9757": {
+  "name": "船井総研ホールディングス",
+  "period": "2026/12",
+  "reported_div": 48,
+  "calculation_div": 48,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "2分割後の年間48円。記念・特別配当の明示なし。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260807/20260806513597.pdf"
+ },
+ "9769": {
+  "name": "学究社",
+  "period": "2027/03",
+  "reported_div": 127,
+  "calculation_div": 127,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "複数年の株主還元計画による年間127円。記念・特別配当の明示なし。",
+  "source": "https://www.gakkyusha.com/wp-content/uploads/2026/06/f3137ff90dc418088c16f0c8fce466a6.pdf"
+ },
+ "4641": {
+  "name": "アルプス技研",
+  "period": "2026/12",
+  "reported_div": 36,
+  "calculation_div": 36,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "過去の創業55周年記念配当は当期予想に含まれない。108円を3分割後の36円に換算。",
+  "source": "https://www.alpsgiken.co.jp/ir/ir/index.html"
+ },
+ "3817": {
+  "name": "SRAホールディングス",
+  "period": "2027/03",
+  "reported_div": 220,
+  "calculation_div": 220,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "中間100円・期末120円。配当性向50%を目途とする通常の配当計画。",
+  "source": "https://www.sra-hd.co.jp/Portals/0/ir/corporate_exp/setsumei260520.pdf"
+ },
+ "3901": {
+  "name": "マークラインズ",
+  "period": "2026/12",
+  "reported_div": 58,
+  "calculation_div": 58,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "配当性向45%への方針変更による年間58円。記念・特別配当の明示なし。",
+  "source": "https://www.marklines.com/en/release/img/20260515_02_en.pdf"
+ },
+ "4674": {
+  "name": "クレスコ",
+  "period": "2027/03",
+  "reported_div": 80.0,
+  "calculation_div": 70,
+  "excluded_div": 10.0,
+  "reviewed_at": "2026-10-08",
+  "note": "2027年3月期の上場30周年記念配当10円を除外（80円−10円＝70円）",
+  "source": "https://www.cresco.co.jp/ja/ir/stockholder/dividend/main/04/teaserItems1/0/linkList/01115/link/260731_ir.pdf"
+ },
+ "4746": {
+  "name": "東計電算",
+  "period": "2026/12",
+  "reported_div": 119.125,
+  "calculation_div": 43.25,
+  "excluded_div": 75.875,
+  "reviewed_at": "2026-10-08",
+  "note": "2026年12月期の有価証券売却による増配を除外し、増配前予想173円を4分割後に換算（173円÷4＝43.25円）。会社公表の普通配当区分ではなく増配前予想を使用",
+  "source": "https://www.toukei.co.jp/wp-content/uploads/2026/08/260803-ir-finance.pdf"
+ },
+ "3844": {
+  "name": "コムチュア",
+  "period": "2027/03",
+  "reported_div": 52,
+  "calculation_div": 52,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.comture.com/ir/irdata/cashdividend.html"
+ },
+ "2003": {
+  "name": "日東富士製粉",
+  "period": "2027/03",
+  "reported_div": 70,
+  "calculation_div": 70,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "累進配当方針による年間280円を4分割後の70円に換算。記念・特別配当の明示なし。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260803/20260803506339.pdf"
+ },
+ "1928": {
+  "name": "積水ハウス",
+  "period": "2027/01",
+  "reported_div": 145,
+  "calculation_div": 145,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.sekisuihouse.co.jp/company/financial/holders/kangen/"
+ },
+ "6345": {
+  "name": "アイチコーポレーション",
+  "period": "2027/03",
+  "reported_div": 65,
+  "calculation_div": 65,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.aichi-corp.co.jp/hubfs/aichi-corp.co.jp/files/news/2026/07/statement_of_accounts_2026_1.pdf"
+ },
+ "9364": {
+  "name": "上組",
+  "period": "2027/03",
+  "reported_div": 205,
+  "calculation_div": 205,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260813/20260813518854.pdf"
+ },
+ "9381": {
+  "name": "エーアイテイー",
+  "period": "2027/02",
+  "reported_div": 110,
+  "calculation_div": 110,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.ait-jp.com/docs/ir/library/202607151200001.pdf"
+ },
+ "7989": {
+  "name": "立川ブラインド工業",
+  "period": "2026/12",
+  "reported_div": 120,
+  "calculation_div": 120,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "中期経営計画のDOE4%以上・累進配当方針に基づく年間120円。記念・特別配当の明示なし。",
+  "source": "https://www.blind.co.jp/shared/news/data/kessan_setsumei_26_02.pdf"
+ },
+ "7994": {
+  "name": "オカムラ",
+  "period": "2027/03",
+  "reported_div": 105,
+  "calculation_div": 105,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260807/20260807513840.pdf"
+ },
+ "4540": {
+  "name": "ツムラ",
+  "period": "2027/03",
+  "reported_div": 158,
+  "calculation_div": 158,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "DOE5%を目安とする配当方針に基づく年間158円。記念・特別配当の明示なし。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260806/20260806511803.pdf"
+ },
+ "5108": {
+  "name": "ブリヂストン",
+  "period": "2026/12",
+  "reported_div": 125,
+  "calculation_div": 125,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.bridgestone.co.jp/ir/financialdata/forecasts/"
+ },
+ "9989": {
+  "name": "サンドラッグ",
+  "period": "2027/03",
+  "reported_div": 132,
+  "calculation_div": 132,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://finance-frontend-pc-dist.west.edge.storage-yahoo.jp/disclosure/20260814/20260813519880.pdf"
+ },
+ "4206": {
+  "name": "アイカ工業",
+  "period": "2027/03",
+  "reported_div": 144,
+  "calculation_div": 144,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "2026年8月4日発表の業績好調・累進配当方針による144円。記念・特別配当の明示なし。",
+  "source": "https://www.aica.co.jp/company/ir/files/pdf/20260804_dividend.pdf"
+ },
+ "5982": {
+  "name": "マルゼン",
+  "period": "2027/02",
+  "reported_div": 125,
+  "calculation_div": 125,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "当期の会社配当予想に記念配当・特別配当、又は金額を特定できる一時的な追加還元の明示なし。会社予想を使用。",
+  "source": "https://www.maruzen-kitchen.co.jp/toushika/PDF/M202702Q1tan.pdf"
+ },
+ "4290": {
+  "name": "プレステージ・インターナショナル",
+  "period": "2027/03",
+  "reported_div": 28,
+  "calculation_div": 28,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "株主還元方針に基づく年間28円。周年記念の株主優待は配当金に含めない。",
+  "source": "https://www.prestigein.com/IR/stock/stock_dividends.html"
+ },
+ "2815": {
+  "name": "アリアケジャパン",
+  "period": "2027/03",
+  "reported_div": 300,
+  "calculation_div": 180,
+  "excluded_div": 120.0,
+  "reviewed_at": "2026-10-08",
+  "note": "2027年3月期の創業60周年記念配当120円を除外（300円−120円＝180円）",
+  "source": "https://www.ariakejapan.com/ja/ir/news/auto_20260512527208/pdfFile.pdf"
+ },
+ "4362": {
+  "name": "日本精化",
+  "period": "2027/03",
+  "reported_div": 104,
+  "calculation_div": 104,
+  "excluded_div": 0.0,
+  "reviewed_at": "2026-10-08",
+  "note": "DOE4.3%を目安とする株主還元方針に基づく年間104円。記念・特別配当の明示なし。",
+  "source": "https://www.nipponseika.co.jp/nfc/wp-content/uploads/2026/05/2026年3月期決算説明会資料_20260514.pdf"
+ }
+}

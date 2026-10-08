@@ -13,5 +13,19 @@
   "note": "2026年12月期の有価証券売却による増配を除外し、増配前予想173円を4分割後に換算（173円÷4＝43.25円）。会社公表の普通配当区分ではなく増配前予想を使用",
   "source": "https://www.toukei.co.jp/wp-content/uploads/2026/08/260803-ir-finance.pdf",
   "split_source": "https://www.toukei.co.jp/wp-content/uploads/2026/08/260803-ir-news.pdf"
+ },
+ "4674": {
+  "period": "2027/03",
+  "reported_div": 80,
+  "calculation_div": 70,
+  "note": "2027年3月期の上場30周年記念配当10円を除外（80円−10円＝70円）",
+  "source": "https://www.cresco.co.jp/ja/ir/stockholder/dividend/main/04/teaserItems1/0/linkList/01115/link/260731_ir.pdf"
+ },
+ "8725": {
+  "period": "2027/03",
+  "reported_div": 170,
+  "calculation_div": 140,
+  "note": "2027年3月期の特別配当30円（中間15円・期末15円）を除外し、普通配当140円を使用（170円−30円＝140円）",
+  "source": "https://data.swcms.net/file/corp-ms-ad-hd/dam/jcr:5b562e47-5418-4b70-81c8-44fccaba5ddb/140120260508519047.pdf"
  }
 }
