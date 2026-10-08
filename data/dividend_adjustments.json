@@ -1,0 +1,17 @@
+{
+ "2815": {
+  "period": "2027/03",
+  "reported_div": 300,
+  "calculation_div": 180,
+  "note": "2027年3月期の創業60周年記念配当120円を除外（300円−120円＝180円）",
+  "source": "https://www.ariakejapan.com/ja/ir/news/auto_20260512527208/pdfFile.pdf"
+ },
+ "4746": {
+  "period": "2026/12",
+  "reported_div": 119.125,
+  "calculation_div": 43.25,
+  "note": "2026年12月期の有価証券売却による増配を除外し、増配前予想173円を4分割後に換算（173円÷4＝43.25円）。会社公表の普通配当区分ではなく増配前予想を使用",
+  "source": "https://www.toukei.co.jp/wp-content/uploads/2026/08/260803-ir-finance.pdf",
+  "split_source": "https://www.toukei.co.jp/wp-content/uploads/2026/08/260803-ir-news.pdf"
+ }
+}

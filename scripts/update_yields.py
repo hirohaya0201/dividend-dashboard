@@ -15,6 +15,8 @@ from urllib.error import HTTPError, URLError
 JST = timezone(timedelta(hours=9))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UA = {"User-Agent": "Mozilla/5.0"}
+with open(os.path.join(ROOT, "data/dividend_adjustments.json"), encoding="utf-8") as file:
+    DIVIDEND_ADJUSTMENTS = json.load(file)
 
 
 def rounded(value):
@@ -131,7 +133,8 @@ def parse_yahoo(raw):
         text = next(dd for dt, dd in fields if dt.startswith(label))
         return text, Decimal(re.search(r"[\d,]+(?:\.\d+)?", text)[0].replace(",", ""))
     _, shares = value("発行済株式数")
-    _, dividend = value("1株配当")
+    dividend_text, dividend = value("1株配当")
+    dividend_period = re.search(r"\((\d{4}/\d{2})\)", dividend_text)[1]
     cap_text, cap_million = value("時価総額")
     board = re.search(r'class="[^"]*\b_CommonPriceBoard__price_\w+[^"]*">.*?class="_StyledNumber__value[^>]*>([\d,.]+)</span>', raw, re.S)
     price = Decimal(board[1].replace(",", ""))
@@ -149,8 +152,18 @@ def parse_yahoo(raw):
     cap = price * shares / Decimal(100000000)
     if abs(cap - cap_million / 100) > Decimal("0.02"):
         raise ValueError("Yahoo price, shares and market cap do not agree")
-    return {"price": float(price), "div": float(dividend), "shares": int(shares),
+    return {"price": float(price), "div": float(dividend), "div_period": dividend_period, "shares": int(shares),
             "cap": rounded(cap), "quote_at": quote_at}
+
+
+def calculation_dividend(code, reported, period):
+    adjustment = DIVIDEND_ADJUSTMENTS.get(code)
+    if not adjustment or adjustment["period"] != period:
+        return reported, ""
+    # A revised forecast needs a fresh check of its nonrecurring component.
+    if abs(Decimal(str(reported)) - Decimal(str(adjustment["reported_div"]))) >= Decimal("0.01"):
+        raise ValueError(f"Dividend adjustment needs review: {code} {period} forecast={reported}")
+    return adjustment["calculation_div"], adjustment["note"]
 
 
 def get_stock(code):
@@ -163,6 +176,8 @@ def get_stock(code):
     price, quote_at, source = yahoo["price"], yahoo["quote_at"], "Yahoo Finance"
     # Keep sub-sen precision when the two sources agree to Yahoo's displayed cents.
     dividend = dividend if abs(dividend - yahoo["div"]) < .01 else yahoo["div"]
+    reported_dividend = dividend
+    dividend, dividend_note = calculation_dividend(code, dividend, yahoo["div_period"])
     current = rounded(Decimal(str(dividend)) / Decimal(str(price)) * 100)
     if not 0.1 <= current <= 15:
         raise ValueError(f"Unexpected current yield: {current}")
@@ -173,9 +188,15 @@ def get_stock(code):
             "hist": list(reversed(history)), "historyPeriod": history[0]["y"] + "〜" + history[-1]["y"],
             "quoteAt": quote_at.isoformat(), "quoteSource": source, "price": price, "div": dividend,
             "shares": yahoo["shares"], "divSource": "Yahoo Finance"}
+    if dividend_note:
+        data.update({"reportedDiv": reported_dividend, "divPeriod": yahoo["div_period"],
+                     "divNote": dividend_note, "divSource": DIVIDEND_ADJUSTMENTS[code]["source"]})
     cache = {"div": dividend, "irbank_yield": rounded(Decimal(str(dividend)) / Decimal(str(top["close"])) * 100),
              "cap": data["cap"], "shares": yahoo["shares"], "div_source": "Yahoo Finance",
              "asof": datetime.now(JST).strftime("%Y-%m-%d")}
+    if dividend_note:
+        cache.update({"reported_div": reported_dividend, "div_period": yahoo["div_period"],
+                      "div_note": dividend_note, "div_source": data["divSource"]})
     return data, cache
 
 
