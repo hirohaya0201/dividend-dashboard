@@ -85,7 +85,7 @@ tbody tr.marked:hover,tbody tr.marked:nth-child(even):hover{background:#fbd9d4}
 <div class="stats-row" id="statsRow"></div>
 <div class="controls">
   <input class="search" id="search" placeholder="🔍 銘柄名・コードで絞り込み" oninput="render()">
-  <span class="count-badge" id="countBadge">33件</span>
+  <span class="count-badge" id="countBadge">37件</span>
   <span class="mark-count" id="markCount">選択 0件</span>
   <button class="btn" id="onlyMarkedBtn" onclick="toggleOnlyMarked()">チェックのみ表示</button>
   <button class="btn" onclick="clearMarks()">一括解除</button>
@@ -153,6 +153,8 @@ const RAW = [
   {code:"4206",name:"アイカ工業", cap:2488.01, ind:"化学", cy:3.27, my:3.82, myr:"2026年3月", avg10y:3.62, hist:[{y:"2026年3月期",v:3.82},{y:"2025年3月期",v:3.73},{y:"2024年3月期",v:3.38},{y:"2023年3月期",v:3.56}]},
   {code:"5982",name:"マルゼン", cap:769.44, ind:"機械", cy:3.13, my:4.04, myr:"2024年2月", avg10y:3.80, hist:[{y:"2026年2月期",v:3.54},{y:"2025年2月期",v:3.74},{y:"2024年2月期",v:4.04},{y:"2023年2月期",v:3.88}]},
   {code:"4290",name:"プレステージ・インターナショナル", cap:848.27, ind:"サービス業", cy:4.20, my:3.90, myr:"2026年3月", avg10y:2.75, hist:[{y:"2026年3月期",v:3.90},{y:"2025年3月期",v:3.47},{y:"2024年3月期",v:1.97},{y:"2023年3月期",v:1.64}]},
+  {code:"2815", name:"アリアケジャパン", cap:1679.8, ind:"食料品", cy:5.86, my:2.1, myr:"2025年3月", avg10y:1.43, hist:[{"y":"2025年3月期","v":2.1},{"y":"2024年3月期","v":2.09},{"y":"2023年3月期","v":2.09},{"y":"2022年3月期","v":1.85}]},
+  {code:"4362", name:"日本精化", cap:654.16, ind:"化学", cy:3.79, my:3.7, myr:"2025年3月", avg10y:2.58, hist:[{"y":"2025年3月期","v":3.7},{"y":"2024年3月期","v":2.73},{"y":"2023年3月期","v":2.18},{"y":"2022年3月期","v":2.43}]},
 ];
 RAW.forEach(s=>{s.ratioDisplay=s.my>0?Math.round(s.cy/s.my*100):null;});
 const MAX_Y=8.0;
@@ -218,3 +220,4 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){naviga
 </script>
 </body>
 </html>
+
