@@ -1,224 +1,298 @@
 {
  "9986": {
-  "div": 100.0,
+  "div": 100,
   "irbank_yield": 4.02,
   "cap": 156.46,
-  "asof": "2026-10-08"
+  "asof": "2026-10-08",
+  "shares": 6266000,
+  "div_source": "Yahoo Finance"
  },
  "3076": {
-  "div": 140.0,
+  "div": 140,
   "irbank_yield": 4.69,
-  "cap": 1676.21,
-  "asof": "2026-10-08"
+  "cap": 1680.17,
+  "asof": "2026-10-08",
+  "shares": 56590410,
+  "div_source": "Yahoo Finance"
  },
  "8130": {
-  "div": 155.0,
+  "div": 155,
   "irbank_yield": 4.93,
-  "cap": 1841.12,
-  "asof": "2026-10-08"
+  "cap": 1844.08,
+  "asof": "2026-10-08",
+  "shares": 59200000,
+  "div_source": "Yahoo Finance"
  },
  "2659": {
-  "div": 110.0,
+  "div": 110,
   "irbank_yield": 3.51,
-  "cap": 1970.07,
-  "asof": "2026-10-08"
+  "cap": 1976.47,
+  "asof": "2026-10-08",
+  "shares": 63963308,
+  "div_source": "Yahoo Finance"
  },
  "3333": {
-  "div": 50.0,
+  "div": 50,
   "irbank_yield": 4.05,
-  "cap": 321.19,
-  "asof": "2026-10-08"
+  "cap": 321.45,
+  "asof": "2026-10-08",
+  "shares": 26240800,
+  "div_source": "Yahoo Finance"
  },
  "4008": {
-  "div": 70.0,
+  "div": 70,
   "irbank_yield": 4.69,
-  "cap": 957.97,
-  "asof": "2026-10-08"
+  "cap": 958.34,
+  "asof": "2026-10-08",
+  "shares": 64709285,
+  "div_source": "Yahoo Finance"
  },
  "4097": {
-  "div": 40.0,
+  "div": 40,
   "irbank_yield": 3.36,
-  "cap": 653.04,
-  "asof": "2026-10-08"
+  "cap": 651.92,
+  "asof": "2026-10-08",
+  "shares": 55577526,
+  "div_source": "Yahoo Finance"
  },
  "4958": {
-  "div": 100.0,
+  "div": 100,
   "irbank_yield": 3.01,
-  "cap": 1415.78,
-  "asof": "2026-10-08"
+  "cap": 1420.05,
+  "asof": "2026-10-08",
+  "shares": 42708154,
+  "div_source": "Yahoo Finance"
  },
  "3844": {
-  "div": 52.0,
+  "div": 52,
   "irbank_yield": 4.17,
-  "cap": 399.47,
-  "asof": "2026-10-08"
+  "cap": 401.09,
+  "asof": "2026-10-08",
+  "shares": 32241600,
+  "div_source": "Yahoo Finance"
  },
  "8725": {
-  "div": 170.0,
+  "div": 170,
   "irbank_yield": 3.5,
-  "cap": 71567.55,
-  "asof": "2026-10-08"
+  "cap": 72120.1,
+  "asof": "2026-10-08",
+  "shares": 1492551732,
+  "div_source": "Yahoo Finance"
  },
  "6785": {
-  "div": 112.0,
+  "div": 112,
   "irbank_yield": 3.14,
-  "cap": 507.03,
-  "asof": "2026-10-08"
+  "cap": 509.2,
+  "asof": "2026-10-08",
+  "shares": 14404400,
+  "div_source": "Yahoo Finance"
  },
  "7723": {
-  "div": 120.0,
+  "div": 120,
   "irbank_yield": 4.2,
-  "cap": 433.61,
-  "asof": "2026-10-08"
+  "cap": 434.23,
+  "asof": "2026-10-08",
+  "shares": 15420000,
+  "div_source": "Yahoo Finance"
  },
  "3231": {
-  "div": 44.0,
+  "div": 44,
   "irbank_yield": 5.19,
-  "cap": 7694.2,
-  "asof": "2026-10-08"
+  "cap": 7728.16,
+  "asof": "2026-10-08",
+  "shares": 917942685,
+  "div_source": "Yahoo Finance"
  },
  "3003": {
-  "div": 67.0,
+  "div": 67,
   "irbank_yield": 4.03,
-  "cap": 12657.98,
-  "asof": "2026-10-08"
+  "cap": 12697.35,
+  "asof": "2026-10-08",
+  "shares": 767907735,
+  "div_source": "Yahoo Finance"
  },
  "2169": {
-  "div": 74.0,
+  "div": 74,
   "irbank_yield": 4.25,
-  "cap": 121.04,
-  "asof": "2026-10-08"
+  "cap": 120.9,
+  "asof": "2026-10-08",
+  "shares": 6924400,
+  "div_source": "Yahoo Finance"
  },
  "9757": {
-  "div": 48.0,
+  "div": 48,
   "irbank_yield": 4.12,
-  "cap": 1153.0,
-  "asof": "2026-10-08"
+  "cap": 1157.0,
+  "asof": "2026-10-08",
+  "shares": 100000000,
+  "div_source": "Yahoo Finance"
  },
  "9769": {
-  "div": 127.0,
+  "div": 127,
   "irbank_yield": 5.05,
   "cap": 272.56,
-  "asof": "2026-10-08"
+  "asof": "2026-10-08",
+  "shares": 10968356,
+  "div_source": "Yahoo Finance"
  },
  "4641": {
-  "div": 36.0,
+  "div": 36,
   "irbank_yield": 4.19,
-  "cap": 1596.46,
-  "asof": "2026-10-08"
+  "cap": 535.26,
+  "asof": "2026-10-08",
+  "shares": 62240025,
+  "div_source": "Yahoo Finance"
  },
  "3817": {
-  "div": 220.0,
+  "div": 220,
   "irbank_yield": 4.73,
-  "cap": 707.14,
-  "asof": "2026-10-08"
+  "cap": 707.9,
+  "asof": "2026-10-08",
+  "shares": 15240000,
+  "div_source": "Yahoo Finance"
  },
  "3901": {
-  "div": 58.0,
+  "div": 58,
   "irbank_yield": 3.81,
-  "cap": 198.83,
-  "asof": "2026-10-08"
+  "cap": 198.7,
+  "asof": "2026-10-08",
+  "shares": 13228800,
+  "div_source": "Yahoo Finance"
  },
  "4674": {
-  "div": 35.0,
+  "div": 80.0,
   "irbank_yield": 1.82,
-  "cap": 792.96,
-  "asof": "2026-10-08"
+  "cap": 795.06,
+  "asof": "2026-10-08",
+  "shares": 42000000,
+  "div_source": "Yahoo Finance"
  },
  "4746": {
   "div": 119.125,
   "irbank_yield": 5.94,
   "cap": 1512.46,
-  "asof": "2026-10-08"
+  "asof": "2026-10-08",
+  "shares": 74800000,
+  "div_source": "Yahoo Finance"
  },
  "2003": {
-  "div": 70.0,
+  "div": 70,
   "irbank_yield": 3.79,
-  "cap": 684.71,
-  "asof": "2026-10-08"
+  "cap": 688.84,
+  "asof": "2026-10-08",
+  "shares": 37538912,
+  "div_source": "Yahoo Finance"
  },
  "1928": {
-  "div": 145.0,
+  "div": 145,
   "irbank_yield": 4.37,
-  "cap": 21547.81,
-  "asof": "2026-10-08"
+  "cap": 21626.12,
+  "asof": "2026-10-08",
+  "shares": 651585566,
+  "div_source": "Yahoo Finance"
  },
  "6345": {
-  "div": 65.0,
+  "div": 65,
   "irbank_yield": 4.52,
-  "cap": 909.79,
-  "asof": "2026-10-08"
+  "cap": 909.15,
+  "asof": "2026-10-08",
+  "shares": 64570000,
+  "div_source": "Yahoo Finance"
  },
  "9364": {
-  "div": 205.0,
+  "div": 205,
   "irbank_yield": 4.4,
-  "cap": 4954.76,
-  "asof": "2026-10-08"
+  "cap": 4978.2,
+  "asof": "2026-10-08",
+  "shares": 106576837,
+  "div_source": "Yahoo Finance"
  },
  "9381": {
-  "div": 110.0,
+  "div": 110,
   "irbank_yield": 4.99,
-  "cap": 514.14,
-  "asof": "2026-10-08"
+  "cap": 517.01,
+  "asof": "2026-10-08",
+  "shares": 23913600,
+  "div_source": "Yahoo Finance"
  },
  "7989": {
-  "div": 120.0,
+  "div": 120,
   "irbank_yield": 4.61,
-  "cap": 528.23,
-  "asof": "2026-10-08"
+  "cap": 529.06,
+  "asof": "2026-10-08",
+  "shares": 20763600,
+  "div_source": "Yahoo Finance"
  },
  "7994": {
-  "div": 105.0,
+  "div": 105,
   "irbank_yield": 4.83,
-  "cap": 2171.4,
-  "asof": "2026-10-08"
+  "cap": 2179.45,
+  "asof": "2026-10-08",
+  "shares": 100621021,
+  "div_source": "Yahoo Finance"
  },
  "4540": {
-  "div": 158.0,
+  "div": 158,
   "irbank_yield": 4.21,
-  "cap": 2851.57,
-  "asof": "2026-10-08"
+  "cap": 2863.85,
+  "asof": "2026-10-08",
+  "shares": 76758362,
+  "div_source": "Yahoo Finance"
  },
  "5108": {
-  "div": 125.0,
+  "div": 125,
   "irbank_yield": 3.26,
-  "cap": 51266.08,
-  "asof": "2026-10-08"
+  "cap": 49679.69,
+  "asof": "2026-10-08",
+  "shares": 1291387942,
+  "div_source": "Yahoo Finance"
  },
  "9989": {
-  "div": 132.0,
+  "div": 132,
   "irbank_yield": 3.73,
-  "cap": 4201.65,
-  "asof": "2026-10-08"
+  "cap": 4208.81,
+  "asof": "2026-10-08",
+  "shares": 119331184,
+  "div_source": "Yahoo Finance"
  },
  "4206": {
-  "div": 144.0,
+  "div": 144,
   "irbank_yield": 3.36,
-  "cap": 2900.99,
-  "asof": "2026-10-08"
+  "cap": 2904.37,
+  "asof": "2026-10-08",
+  "shares": 67590664,
+  "div_source": "Yahoo Finance"
  },
  "5982": {
-  "div": 125.0,
+  "div": 125,
   "irbank_yield": 3.12,
-  "cap": 786.25,
-  "asof": "2026-10-08"
+  "cap": 786.26,
+  "asof": "2026-10-08",
+  "shares": 19780000,
+  "div_source": "Yahoo Finance"
  },
  "4290": {
-  "div": 28.0,
+  "div": 28,
   "irbank_yield": 4.24,
-  "cap": 843.18,
-  "asof": "2026-10-08"
+  "cap": 849.05,
+  "asof": "2026-10-08",
+  "shares": 127293300,
+  "div_source": "Yahoo Finance"
  },
  "2815": {
-  "div": 300.0,
+  "div": 300,
   "irbank_yield": 5.86,
-  "cap": 1656.84,
-  "asof": "2026-10-08"
+  "cap": 1666.68,
+  "asof": "2026-10-08",
+  "shares": 32808683,
+  "div_source": "Yahoo Finance"
  },
  "4362": {
-  "div": 104.0,
+  "div": 104,
   "irbank_yield": 3.79,
-  "cap": 656.31,
-  "asof": "2026-10-08"
+  "cap": 659.88,
+  "asof": "2026-10-08",
+  "shares": 23822447,
+  "div_source": "Yahoo Finance"
  }
 }

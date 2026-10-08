@@ -124,33 +124,58 @@ def parse_top(raw, code):
             "dividend_url": "https://irbank.net/" + company[1] + "/dividend"}
 
 
+def parse_yahoo(raw):
+    fields = [(plain(dt), plain(dd)) for dt, dd in re.findall(
+        r'<dl\b[^>]*class="_DataListItem[^>]*>\s*<dt\b[^>]*>(.*?)</dt>\s*<dd\b[^>]*>(.*?)</dd>\s*</dl>', raw, re.S)]
+    def value(label):
+        text = next(dd for dt, dd in fields if dt.startswith(label))
+        return text, Decimal(re.search(r"[\d,]+(?:\.\d+)?", text)[0].replace(",", ""))
+    _, shares = value("発行済株式数")
+    _, dividend = value("1株配当")
+    cap_text, cap_million = value("時価総額")
+    board = re.search(r'class="[^"]*\b_CommonPriceBoard__price_\w+[^"]*">.*?class="_StyledNumber__value[^>]*>([\d,.]+)</span>', raw, re.S)
+    price = Decimal(board[1].replace(",", ""))
+    stamp = re.search(r"\(([^()]+)\)", cap_text)[1]
+    now = datetime.now(JST)
+    if re.fullmatch(r"\d{1,2}:\d{2}", stamp):
+        hour, minute = map(int, stamp.split(":"))
+        quote_at = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    elif re.fullmatch(r"\d{1,2}/\d{1,2}", stamp):
+        month, day = map(int, stamp.split("/"))
+        year = now.year if (month, day) <= (now.month, now.day) else now.year - 1
+        quote_at = datetime(year, month, day, 15, 30, tzinfo=JST)
+    else:
+        raise ValueError(f"Yahoo quote date missing: {stamp}")
+    cap = price * shares / Decimal(100000000)
+    if abs(cap - cap_million / 100) > Decimal("0.02"):
+        raise ValueError("Yahoo price, shares and market cap do not agree")
+    return {"price": float(price), "div": float(dividend), "shares": int(shares),
+            "cap": rounded(cap), "quote_at": quote_at}
+
+
 def get_stock(code):
     top = parse_top(fetch("https://irbank.net/" + code), code)
     dividend, history = parse_history(fetch(top["dividend_url"]))
     dividend = top["div"] if top["div"] is not None else dividend
     if dividend is None:
         raise ValueError("Annual dividend missing")
-    price, quote_at, source = top["close"], top["quote_at"], "IRBANK"
-    try:
-        result = json.loads(fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{code}.T?range=1d&interval=1d"))
-        meta = result["chart"]["result"][0]["meta"]
-        yahoo_at = datetime.fromtimestamp(meta["regularMarketTime"], JST)
-        yahoo_price = float(meta["regularMarketPrice"])
-        if yahoo_price > 0 and quote_at <= yahoo_at <= datetime.now(JST) + timedelta(minutes=5):
-            price, quote_at, source = yahoo_price, yahoo_at, "Yahoo Finance"
-    except Exception as exc:
-        print(f"[WARN] {code}: Yahoo unavailable, using IRBANK closing quote: {exc}", flush=True)
+    yahoo = parse_yahoo(fetch(f"https://finance.yahoo.co.jp/quote/{code}.T"))
+    price, quote_at, source = yahoo["price"], yahoo["quote_at"], "Yahoo Finance"
+    # Keep sub-sen precision when the two sources agree to Yahoo's displayed cents.
+    dividend = dividend if abs(dividend - yahoo["div"]) < .01 else yahoo["div"]
     current = rounded(Decimal(str(dividend)) / Decimal(str(price)) * 100)
     if not 0.1 <= current <= 15:
         raise ValueError(f"Unexpected current yield: {current}")
     highest = max(history, key=lambda x: x["v"])
-    data = {"cy": current, "cap": rounded(Decimal(str(top["cap"])) * Decimal(str(price)) / Decimal(str(top["close"]))),
+    data = {"cy": current, "cap": yahoo["cap"],
             "avg10y": rounded(sum(Decimal(str(h["v"])) for h in history) / 10),
             "my": highest["v"], "myr": highest["y"].removesuffix("期"),
             "hist": list(reversed(history)), "historyPeriod": history[0]["y"] + "〜" + history[-1]["y"],
-            "quoteAt": quote_at.isoformat(), "quoteSource": source, "price": price, "div": dividend}
+            "quoteAt": quote_at.isoformat(), "quoteSource": source, "price": price, "div": dividend,
+            "shares": yahoo["shares"], "divSource": "Yahoo Finance"}
     cache = {"div": dividend, "irbank_yield": rounded(Decimal(str(dividend)) / Decimal(str(top["close"])) * 100),
-             "cap": data["cap"], "asof": datetime.now(JST).strftime("%Y-%m-%d")}
+             "cap": data["cap"], "shares": yahoo["shares"], "div_source": "Yahoo Finance",
+             "asof": datetime.now(JST).strftime("%Y-%m-%d")}
     return data, cache
 
 
