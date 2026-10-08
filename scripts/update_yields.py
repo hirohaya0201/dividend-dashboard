@@ -1,234 +1,203 @@
 #!/usr/bin/env python3
-"""配当ダッシュボード自動更新スクリプト (GitHub Actions用)
-
-- 各ダッシュボードHTML内の銘柄コードを抽出
-- 年間配当予想: IRBANK (キャッシュ data/dividends.json、7日毎に再取得)
-- 株価: Yahoo Finance chart API → stooq CSV の順でフォールバック
-- 現在利回り cy = 配当予想 ÷ 株価 × 100 を書き換え
-- どちらも失敗した場合は IRBANK掲載の予想利回りを使用、それも無ければ既存値維持
-"""
+"""Fetch current quotes and the latest ten completed fiscal years for d1."""
+import concurrent.futures
+import html
 import json
 import os
 import re
-import sys
 import time
-import html as htmllib
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal, ROUND_HALF_UP
+from html.parser import HTMLParser
 from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
+from urllib.error import HTTPError, URLError
 
 JST = timezone(timedelta(hours=9))
-UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DASHBOARDS = ["d1/index.html"]
-DIV_CACHE = os.path.join(ROOT, "data", "dividends.json")
-SUMMARY = os.path.join(ROOT, "data", "last_update.json")
-CACHE_DAYS = 7
-YIELD_MIN, YIELD_MAX = 0.1, 15.0
-# 株式分割によるキャッシュ汚染の検知しきい値。計算利回りがIRBANK掲載の
-# 予想利回りのこの倍率を超えたら、キャッシュの配当額が分割前の値とみなす。
-SPLIT_GUARD_RATIO = 1.8
-
-# IRBANK配当表の1行。列は 年度 | 区分 | 中間 | 期末 | 合計 | 分割調整 | 配当利回り% | 備考。
-# 年度セルは年グループの先頭行にしか存在しないため、年度と明細行を別々に拾う。
-ROW_RE = re.compile(
-    r"(?P<year>(?P<y>\d{4})年[\s\|]*(?P<mo>\d{1,2})月)"
-    r"|(?:(?:予想|修正|実績)(?P<nums>(?:[\s\|]+(?:[\d.]+|-)){3,5})[\s\|]+[\d.]+%)"
-)
+UA = {"User-Agent": "Mozilla/5.0"}
 
 
-def fetch(url, timeout=30):
-    req = Request(url, headers=UA)
-    with urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", errors="replace")
+def rounded(value):
+    return float(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-def strip_tags(raw):
-    text = re.sub(r"<script[\s\S]*?</script>", "|", raw, flags=re.I)
-    text = re.sub(r"<[^>]+>", "|", text)
-    return htmllib.unescape(text)
-
-
-def parse_market_cap(raw_html):
-    """IRBANK銘柄トップページの生HTMLから時価総額[億円]を取得。失敗時 None。"""
-    m = re.search(r"<dt>\u6642\u4fa1\u7dcf\u984d</dt>\s*<dd>([^<]+)</dd>", raw_html)
-    if not m:
-        return None
-    s = m.group(1)
-    cho = re.search(r"([\d]+)\u5146", s)
-    oku = re.search(r"([\d]+)\u5104", s)
-    man = re.search(r"([\d]+)\u4e07", s)
-    if not (cho or oku or man):
-        return None
-    total = 0.0
-    if cho:
-        total += int(cho.group(1)) * 10000
-    if oku:
-        total += int(oku.group(1))
-    if man:
-        total += int(man.group(1)) / 10000
-    return round(total, 2)
-
-
-def get_dividend_from_irbank(code):
-    """IRBANKから (年間配当予想[円], IRBANK予想利回り[%], 時価総額[億円]) を取得。失敗時は (None, None, None)。"""
-    try:
-        top = fetch(f"https://irbank.net/{code}")
-    except (URLError, HTTPError, OSError) as e:
-        print(f"  [WARN] {code}: irbank top fetch failed: {e}")
-        return None, None, None
-    cap = parse_market_cap(top)
-    m = re.search(r'href="/(E\d+)/dividend"', top)
-    text = None
-    if m:
+def fetch(url):
+    for attempt in range(2):
         try:
-            time.sleep(0.5)
-            text = strip_tags(fetch(f"https://irbank.net/{m.group(1)}/dividend"))
-        except (URLError, HTTPError, OSError) as e:
-            print(f"  [WARN] {code}: irbank dividend fetch failed: {e}")
-    if text is None:
-        text = strip_tags(top)
+            with urlopen(Request(url, headers=UA), timeout=20) as response:
+                return response.read().decode("utf-8")
+        except (HTTPError, URLError, TimeoutError, OSError) as exc:
+            if attempt or (isinstance(exc, HTTPError) and exc.code < 500):
+                raise
+            time.sleep(1)
 
-    # 直近年度の「合計」を年間配当とする。分割調整列は現在の株数基準と一致しない
-    # ことがあるため使わず、合計（3番目の数値列）を採用する。
-    div_total, best_key, cur_key = None, -1, -1
-    for m in ROW_RE.finditer(text):
-        if m.group("year"):
-            cur_key = int(m.group("y")) * 12 + int(m.group("mo"))
+
+def plain(value):
+    return html.unescape(re.sub(r"<[^>]*>", "", value)).strip()
+
+
+class TableRows(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.rows = []
+        self.row = None
+        self.cell = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "tr":
+            self.row = []
+        elif tag in ("td", "th"):
+            # IRBANK sometimes omits an opening <tr> on rowspan continuation rows.
+            if self.row is None:
+                self.row = []
+            self.cell = []
+
+    def handle_data(self, data):
+        if self.cell is not None:
+            self.cell.append(data)
+
+    def handle_endtag(self, tag):
+        if tag in ("td", "th") and self.cell is not None:
+            self.row.append("".join(self.cell).strip())
+            self.cell = None
+        elif tag == "tr" and self.row is not None:
+            self.rows.append(self.row)
+            self.row = None
+
+
+def parse_history(raw):
+    table = next((t for t in re.findall(r"<table\b[^>]*>.*?</table>", raw, re.S)
+                  if "配当金の状況" in t), None)
+    if table is None:
+        raise ValueError("Dividend table missing")
+    parser = TableRows()
+    parser.feed(table)
+    headers = [re.sub(r"\s+", "", c) for c in parser.rows[0]][1:]
+    total_index = headers.index("合計")
+    yield_index = headers.index("配当利回り")
+    completed = {}
+    latest_div, latest_key, year, month = None, -1, None, None
+    today = datetime.now(JST).date()
+    for cells in parser.rows[1:]:
+        cells = cells.copy()
+        match = re.fullmatch(r"(\d{4})年\s*(\d{1,2})月", cells[0])
+        if match:
+            year, month = int(match[1]), int(match[2])
+            cells.pop(0)
+        if year is None or len(cells) <= yield_index:
             continue
-        if cur_key < 0:
+        kind = cells[0]
+        if kind not in ("予想", "修正", "実績"):
             continue
-        nums = re.findall(r"[\d.]+|-", m.group("nums"))
-        if len(nums) < 3 or nums[2] == "-":
-            continue
-        if cur_key >= best_key:
-            best_key = cur_key
-            div_total = float(nums[2])
+        total = cells[total_index].replace(",", "")
+        key = year * 12 + month
+        if re.fullmatch(r"\d+(?:\.\d+)?", total) and key >= latest_key:
+            latest_div, latest_key = float(total), key
+        match = re.search(r"([\d.]+)%", cells[yield_index])
+        if kind == "実績" and match and (year, month) <= (today.year, today.month):
+            completed[key] = {"y": f"{year}年{month}月期", "v": float(match[1])}
+    history = [completed[k] for k in sorted(completed)[-10:]]
+    if len(history) != 10:
+        raise ValueError(f"Expected ten actual years, found {len(history)}")
+    return latest_div, history
 
-    ir_yield = None
-    m2 = re.search(r"配当[\s\|]*予[\s\|]+([\d.]+)%", text)
-    if m2:
-        ir_yield = float(m2.group(1))
-    return div_total, ir_yield, cap
+
+def parse_top(raw, code):
+    values = [(plain(dt), plain(dd)) for dt, dd in re.findall(
+        r"<dt\b[^>]*>(.*?)</dt>\s*<dd\b[^>]*>(.*?)</dd>", raw, re.S)]
+    cap_text = next(dd for dt, dd in values if dt == "時価総額")
+    cap = 0.0
+    for unit, multiplier in [("兆", 10000), ("億", 1), ("万", .0001)]:
+        match = re.search(r"([\d,.]+)" + unit, cap_text)
+        if match:
+            cap += float(match[1].replace(",", "")) * multiplier
+    close = float(next(dd for dt, dd in values if dt.startswith("終値")).replace(",", ""))
+    date_match = re.search(r'href="/' + code + r'/chart">(\d{4}/\d{2}/\d{2})', raw)
+    quote_at = datetime.strptime(date_match[1], "%Y/%m/%d").replace(hour=15, minute=30, tzinfo=JST)
+    div_text = next(dd for dt, dd in values if "配当利回り" in dt and "予" in dt)
+    div_match = re.search(r"([\d.]+)%\s*\(([\d,.]+)\)", div_text)
+    div = float(div_match[2].replace(",", "")) if div_match else None
+    company = re.search(r'href="/(E\d+)/dividend"', raw)
+    if not company or cap <= 0 or close <= 0:
+        raise ValueError("Required IRBANK values missing")
+    return {"cap": cap, "close": close, "quote_at": quote_at, "div": div,
+            "dividend_url": "https://irbank.net/" + company[1] + "/dividend"}
 
 
-def get_price(code):
-    """現在株価。Yahoo → stooq フォールバック。失敗時 None。"""
+def get_stock(code):
+    top = parse_top(fetch("https://irbank.net/" + code), code)
+    dividend, history = parse_history(fetch(top["dividend_url"]))
+    dividend = top["div"] if top["div"] is not None else dividend
+    if dividend is None:
+        raise ValueError("Annual dividend missing")
+    price, quote_at, source = top["close"], top["quote_at"], "IRBANK"
     try:
-        j = json.loads(fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{code}.T?range=1d&interval=1d"))
-        p = j["chart"]["result"][0]["meta"].get("regularMarketPrice")
-        if p and p > 0:
-            return float(p), "yahoo"
-    except Exception as e:
-        print(f"  [WARN] {code}: yahoo failed: {e}")
-    try:
-        csv = fetch(f"https://stooq.com/q/l/?s={code}.jp&f=sd2t2ohlcv&e=csv")
-        line = csv.strip().splitlines()[-1]
-        c = line.split(",")[6]
-        if c not in ("N/D", "", "-"):
-            p = float(c)
-            if p > 0:
-                return p, "stooq"
-    except Exception as e:
-        print(f"  [WARN] {code}: stooq failed: {e}")
-    return None, None
+        result = json.loads(fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{code}.T?range=1d&interval=1d"))
+        meta = result["chart"]["result"][0]["meta"]
+        yahoo_at = datetime.fromtimestamp(meta["regularMarketTime"], JST)
+        yahoo_price = float(meta["regularMarketPrice"])
+        if yahoo_price > 0 and quote_at <= yahoo_at <= datetime.now(JST) + timedelta(minutes=5):
+            price, quote_at, source = yahoo_price, yahoo_at, "Yahoo Finance"
+    except Exception as exc:
+        print(f"[WARN] {code}: Yahoo unavailable, using IRBANK closing quote: {exc}", flush=True)
+    current = rounded(Decimal(str(dividend)) / Decimal(str(price)) * 100)
+    if not 0.1 <= current <= 15:
+        raise ValueError(f"Unexpected current yield: {current}")
+    highest = max(history, key=lambda x: x["v"])
+    data = {"cy": current, "cap": rounded(Decimal(str(top["cap"])) * Decimal(str(price)) / Decimal(str(top["close"]))),
+            "avg10y": rounded(sum(Decimal(str(h["v"])) for h in history) / 10),
+            "my": highest["v"], "myr": highest["y"].removesuffix("期"),
+            "hist": list(reversed(history)), "historyPeriod": history[0]["y"] + "〜" + history[-1]["y"],
+            "quoteAt": quote_at.isoformat(), "quoteSource": source, "price": price, "div": dividend}
+    cache = {"div": dividend, "irbank_yield": rounded(Decimal(str(dividend)) / Decimal(str(top["close"])) * 100),
+             "cap": data["cap"], "asof": datetime.now(JST).strftime("%Y-%m-%d")}
+    return data, cache
 
 
 def main():
-    now = datetime.now(JST)
-    # 配当キャッシュ読み込み
-    cache = {}
-    if os.path.exists(DIV_CACHE):
-        with open(DIV_CACHE, encoding="utf-8") as f:
-            cache = json.load(f)
-
-    # 全銘柄コード収集
-    docs = {}
-    codes = []
-    for rel in DASHBOARDS:
-        path = os.path.join(ROOT, rel)
-        with open(path, encoding="utf-8") as f:
-            docs[rel] = f.read()
-        for c in re.findall(r'\{code:"(\d{4})"', docs[rel]):
-            if c not in codes:
-                codes.append(c)
-    print(f"銘柄数: {len(codes)}")
-
-    # 配当予想の更新（キャッシュが古い/無い銘柄のみ）
-    cutoff = (now - timedelta(days=CACHE_DAYS)).strftime("%Y-%m-%d")
-    for c in codes:
-        ent = cache.get(c)
-        if ent and ent.get("asof", "") >= cutoff and ent.get("div"):
-            continue
-        div, ir_y, cap = get_dividend_from_irbank(c)
-        if div or ir_y or cap:
-            cache[c] = {"div": div, "irbank_yield": ir_y, "cap": cap, "asof": now.strftime("%Y-%m-%d")}
-            print(f"  {c}: 配当予想 {div}円 / IRBANK利回り {ir_y}% / 時価総額 {cap}億円")
-            if cap is not None:
-                for rel in DASHBOARDS:
-                    docs[rel] = re.sub(
-                        r'(\{code:"%s"[^\n]*?cap:)([\d.]+)' % c,
-                        lambda m: f"{m.group(1)}{cap:.2f}",
-                        docs[rel],
-                    )
-        else:
-            print(f"  [WARN] {c}: 配当情報の取得失敗（既存キャッシュ使用）")
-        time.sleep(0.7)
-
-    # 利回り計算と書き換え
+    page_path = os.path.join(ROOT, "d1/index.html")
+    cache_path = os.path.join(ROOT, "data/dividends.json")
+    page = open(page_path, encoding="utf-8").read()
+    cache = json.load(open(cache_path, encoding="utf-8")) if os.path.exists(cache_path) else {}
+    rows = re.findall(r'^  \{code:"(\d{4})"[^\n]*\},$', page, re.M)
+    if not rows or len(rows) != len(set(rows)):
+        raise ValueError("Missing or duplicate stock codes")
     updated, failed = [], []
-    for c in codes:
-        ent = cache.get(c) or {}
-        cy = None
-        price, src = get_price(c)
-        if price and ent.get("div"):
-            cy = round(ent["div"] / price * 100, 2)
-            reason = f"div {ent['div']} / {src} price {price}"
-            # 株式分割後もキャッシュの配当額が分割前のままだと利回りが数倍に跳ねる。
-            # IRBANK掲載の予想利回りと大きく乖離したら、そちらを採用する。
-            iry = ent.get("irbank_yield")
-            if iry and cy > max(iry * SPLIT_GUARD_RATIO, iry + 1.0):
-                print(f"  [FIX] {c}: 計算値 {cy}% がIRBANK値 {iry}% を大幅超過 → IRBANK値を採用")
-                cy = iry
-                reason = f"irbank yield {iry} (cache div {ent['div']} は乖離のため不採用)"
-        elif ent.get("irbank_yield"):
-            cy = ent["irbank_yield"]
-            reason = "irbank yield fallback"
-        if cy is None or not (YIELD_MIN <= cy <= YIELD_MAX):
-            failed.append(c)
-            print(f"  [SKIP] {c}: cy={cy} 既存値維持")
-            continue
-        for rel in DASHBOARDS:
-            docs[rel] = re.sub(
-                r'(\{code:"%s"[^\n]*?cy:)([\d.]+)' % c,
-                lambda m: f"{m.group(1)}{cy:.2f}",
-                docs[rel],
-            )
-        updated.append(c)
-        print(f"  [OK] {c}: cy={cy:.2f}% ({reason})")
-        time.sleep(0.4)
-
-    # 取得日の更新
-    datestr = f"{now.year}年{now.month}月{now.day}日"
-    for rel in DASHBOARDS:
-        docs[rel] = re.sub(r"データ取得日: \d{4}年\d{1,2}月\d{1,2}日", f"データ取得日: {datestr}", docs[rel])
-        with open(os.path.join(ROOT, rel), "w", encoding="utf-8") as f:
-            f.write(docs[rel])
-
-    os.makedirs(os.path.dirname(DIV_CACHE), exist_ok=True)
-    with open(DIV_CACHE, "w", encoding="utf-8") as f:
-        json.dump(cache, f, ensure_ascii=False, indent=1)
-    with open(SUMMARY, "w", encoding="utf-8") as f:
-        json.dump(
-            {"run_at": now.isoformat(), "updated": updated, "failed": failed},
-            f, ensure_ascii=False, indent=1,
-        )
-
-    print(f"\n完了: 更新 {len(updated)}銘柄 / 失敗 {len(failed)}銘柄 {failed if failed else ''}")
-    if not updated:
-        print("[ERROR] 全銘柄の更新に失敗")
-        sys.exit(1)
+    print(f"Refreshing {len(rows)} stocks", flush=True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        tasks = {executor.submit(get_stock, code): code for code in rows}
+        for task in concurrent.futures.as_completed(tasks):
+            code = tasks[task]
+            try:
+                data, entry = task.result()
+                pattern = r'^  \{code:"' + code + r'"[^\n]*\},$'
+                old_row = re.search(pattern, page, re.M)[0]
+                name = re.search(r'name:("(?:[^"\\]|\\.)*")', old_row)[1]
+                industry = re.search(r'ind:("(?:[^"\\]|\\.)*")', old_row)[1]
+                new_row = '  {code:"' + code + '",name:' + name + ', ind:' + industry
+                new_row += ''.join(', ' + key + ':' + json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+                                   for key, value in data.items()) + '},'
+                page = re.sub(pattern, lambda m: new_row, page, flags=re.M)
+                cache[code] = entry
+                updated.append(code)
+                print(f"[OK] {code} yield={data['cy']}% cap={data['cap']} history={data['historyPeriod']} quote={data['quoteAt']}", flush=True)
+            except Exception as exc:
+                failed.append(code)
+                print(f"[FAIL] {code}: {exc}", flush=True)
+    now = datetime.now(JST)
+    if not failed:
+        page = re.sub(r"データ取得日: \d{4}年\d{1,2}月\d{1,2}日(?: [\d:]+)?",
+                      f"データ取得日: {now.year}年{now.month}月{now.day}日 {now:%H:%M}", page)
+    with open(page_path, "w", encoding="utf-8") as file:
+        file.write(page)
+    with open(cache_path, "w", encoding="utf-8") as file:
+        json.dump(cache, file, ensure_ascii=False, indent=1)
+    with open(os.path.join(ROOT, "data/last_update.json"), "w", encoding="utf-8") as file:
+        json.dump({"run_at": now.isoformat(), "updated": sorted(updated), "failed": sorted(failed)}, file, ensure_ascii=False, indent=1)
+    if failed:
+        raise SystemExit(f"Failed stocks: {failed}")
 
 
 if __name__ == "__main__":
     main()
+
