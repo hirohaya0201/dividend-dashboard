@@ -1,5 +1,5 @@
 {
- "run_at": "2026-10-08T12:50:42.863358+09:00",
+ "run_at": "2026-10-09T15:55:28.530137+09:00",
  "updated": [
   "1928",
   "2003",
@@ -39,5 +39,8 @@
   "9986",
   "9989"
  ],
- "failed": []
+ "failed": [],
+ "errors": {},
+ "dividend_needs_review": [],
+ "history": "Retained verified ten completed fiscal years; not fetched on daily quote updates"
 }
