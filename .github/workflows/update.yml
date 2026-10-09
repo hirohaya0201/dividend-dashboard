@@ -1,24 +1,59 @@
 name: Update dividend yields
 on:
   schedule:
-    - cron: '13 0 * * *'   # 毎日 09:13 JST (00:13 UTC)
+    - cron: '13 0 * * *'   # 毎日 09:13 JST
+    - cron: '13 7 * * *'   # 毎日 16:13 JST、東京市場の引け後
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update.yml'
+      - 'scripts/update_yields.py'
+      - 'tests/test_update_yields.py'
+      - 'data/dividend_adjustments.json'
+      - 'data/dividend_reviews.json'
 permissions:
   contents: write
+concurrency:
+  group: dividend-data-update
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Test updater failure handling
+        run: python -m unittest discover -s tests -v
       - name: Update yields
         run: python scripts/update_yields.py
+      - name: Write update summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path = Path('data/last_update.json')
+          if path.exists():
+              data = json.loads(path.read_text())
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+                  out.write('## Dividend update\n\n')
+                  out.write(f"Run: {data['run_at']}\n\nUpdated: {len(data['updated'])}\n\n")
+                  out.write(f"Retained previous quotes: {data['failed']}\n\n")
+                  out.write(f"Dividend review needed: {data.get('dividend_needs_review', [])}\n\n")
+                  for code, error in data.get('errors', {}).items():
+                      out.write(f'- {code}: {error}\n')
+          PY
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet || git commit -m "Auto-update dividend yields ($(TZ=Asia/Tokyo date +%F))"
-          git push
+          git add d1/index.html data/dividends.json data/last_update.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto-update dividend yields ($(TZ=Asia/Tokyo date +%F))"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

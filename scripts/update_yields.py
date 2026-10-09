@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Fetch current quotes and the latest ten completed fiscal years for d1."""
+"""Refresh quotes independently of the manually verified dividend/history basis."""
 import concurrent.futures
 import html
 import json
+import math
 import os
 import re
 import time
@@ -26,14 +27,15 @@ def rounded(value):
 
 
 def fetch(url):
-    for attempt in range(2):
+    for attempt in range(3):
         try:
             with urlopen(Request(url, headers=UA), timeout=20) as response:
                 return response.read().decode("utf-8")
         except (HTTPError, URLError, TimeoutError, OSError) as exc:
-            if attempt or (isinstance(exc, HTTPError) and exc.code < 500):
-                raise
-            time.sleep(1)
+            retryable = not isinstance(exc, HTTPError) or exc.code == 429 or exc.code >= 500
+            if attempt == 2 or not retryable:
+                raise OSError(f"{url}: {exc}") from exc
+            time.sleep(2 ** attempt)
 
 
 def plain(value):
@@ -176,87 +178,158 @@ def calculation_dividend(code, reported, period):
     return adjustment["calculation_div"], adjustment["note"]
 
 
-def get_stock(code):
-    top = parse_top(fetch("https://irbank.net/" + code), code)
-    dividend, history = parse_history(fetch(top["dividend_url"]))
-    dividend = top["div"] if top["div"] is not None else dividend
-    if dividend is None:
-        raise ValueError("Annual dividend missing")
-    yahoo = parse_yahoo(fetch(f"https://finance.yahoo.co.jp/quote/{code}.T"))
-    price, quote_at, source = yahoo["price"], yahoo["quote_at"], "Yahoo Finance"
-    # Keep sub-sen precision when the two sources agree to Yahoo's displayed cents.
-    dividend = dividend if abs(dividend - yahoo["div"]) < .01 else yahoo["div"]
-    reported_dividend = dividend
-    dividend, dividend_note = calculation_dividend(code, dividend, yahoo["div_period"])
+def parse_chart(raw, code, previous):
+    chart = json.loads(raw)["chart"]
+    if chart.get("error") or not chart.get("result"):
+        raise ValueError(f"Yahoo chart error: {chart.get('error')}")
+    result = chart["result"][0]
+    meta = result["meta"]
+    if meta.get("symbol") != f"{code}.T" or meta.get("currency") != "JPY":
+        raise ValueError("Yahoo chart symbol/currency mismatch")
+    # A new split invalidates the cached per-share dividend and share count.
+    old_stamp = datetime.fromisoformat(previous["quoteAt"]).timestamp()
+    for split in result.get("events", {}).get("splits", {}).values():
+        if split["date"] > old_stamp:
+            raise ValueError("New stock split: dividend/share basis needs review")
+    return {"price": float(meta["regularMarketPrice"]),
+            "quote_at": datetime.fromtimestamp(meta["regularMarketTime"], JST),
+            "shares": previous["shares"], "div": None, "div_period": None}
+
+
+def get_stock(code, previous):
+    warnings = []
+    try:
+        yahoo = parse_yahoo(fetch(f"https://finance.yahoo.co.jp/quote/{code}.T"))
+        source = "Yahoo!ファイナンス"
+        shares_at = yahoo["quote_at"].isoformat()
+    except Exception as exc:
+        warnings.append(str(exc))
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{code}.T?range=1mo&interval=1d&events=splits"
+        yahoo = parse_chart(fetch(url), code, previous)
+        source = "Yahoo Finance chart API"
+        shares_at = previous.get("sharesAt", previous["quoteAt"])
+        warnings.append("配当予想・株式数は前回確認値を使用")
+    price, quote_at = yahoo["price"], yahoo["quote_at"]
+    if not math.isfinite(price) or price <= 0:
+        raise ValueError("Invalid quote price")
+    if quote_at < datetime.fromisoformat(previous["quoteAt"]):
+        raise ValueError("Quote is older than the displayed quote")
+    if quote_at > datetime.now(JST) + timedelta(minutes=5):
+        raise ValueError("Quote date is in the future")
+    if not .55 < yahoo["shares"] / previous["shares"] < 1.8:
+        raise ValueError("Share count changed substantially: check split/dividend basis")
     review = DIVIDEND_REVIEWS[code]
+    # A forecast revision never replaces the reviewed ordinary dividend silently.
+    # Still refresh its price, with the retained calculation basis clearly labelled.
+    needs_review = False
+    if yahoo["div"] is not None:
+        try:
+            calculation_dividend(code, yahoo["div"], yahoo["div_period"])
+        except ValueError as exc:
+            warnings.append(str(exc))
+            needs_review = True
+    dividend = review["calculation_div"]
     current = rounded(Decimal(str(dividend)) / Decimal(str(price)) * 100)
     if not 0.1 <= current <= 15:
         raise ValueError(f"Unexpected current yield: {current}")
-    highest = max(history, key=lambda x: x["v"])
-    data = {"cy": current, "cap": yahoo["cap"],
-            "avg10y": rounded(sum(Decimal(str(h["v"])) for h in history) / 10),
-            "my": highest["v"], "myr": highest["y"].removesuffix("期"),
-            "hist": list(reversed(history)), "historyPeriod": history[0]["y"] + "〜" + history[-1]["y"],
-            "quoteAt": quote_at.isoformat(), "quoteSource": source, "price": price, "div": dividend,
-            "shares": yahoo["shares"], "divSource": review["source"],
-            "divPeriod": yahoo["div_period"], "divReviewAt": review["reviewed_at"],
-            "divReviewNote": review["note"]}
-    if dividend_note:
-        data.update({"reportedDiv": reported_dividend, "divPeriod": yahoo["div_period"],
-                     "divNote": dividend_note, "divSource": DIVIDEND_ADJUSTMENTS[code]["source"]})
-    cache = {"div": dividend, "irbank_yield": rounded(Decimal(str(dividend)) / Decimal(str(top["close"])) * 100),
-             "cap": data["cap"], "shares": yahoo["shares"], "div_source": data["divSource"],
-             "div_period": yahoo["div_period"], "div_review_at": review["reviewed_at"],
-             "div_review_note": review["note"],
-             "asof": datetime.now(JST).strftime("%Y-%m-%d")}
-    if dividend_note:
-        cache.update({"reported_div": reported_dividend, "div_period": yahoo["div_period"],
-                      "div_note": dividend_note, "div_source": data["divSource"]})
-    return data, cache
+    if len(previous["hist"]) != 10:
+        raise ValueError("Verified ten-year history missing")
+    data = previous.copy()
+    data.update({"cy": current, "price": price, "cap": rounded(price * yahoo["shares"] / 100000000),
+                 "shares": yahoo["shares"], "sharesAt": shares_at, "quoteAt": quote_at.isoformat(),
+                 "quoteSource": source, "div": dividend, "divSource": review["source"],
+                 "divPeriod": review["period"], "divReviewAt": review["reviewed_at"],
+                 "divReviewNote": review["note"], "divNeedsReview": needs_review,
+                 "divForecastCheckedAt": datetime.now(JST).isoformat() if yahoo["div"] is not None else previous.get("divForecastCheckedAt"),
+                 "updateStatus": "updated", "updateWarning": " / ".join(warnings)})
+    if needs_review:
+        data.update({"observedDiv": yahoo["div"], "observedDivPeriod": yahoo["div_period"]})
+    else:
+        data.pop("observedDiv", None)
+        data.pop("observedDivPeriod", None)
+    adjustment = DIVIDEND_ADJUSTMENTS.get(code)
+    if adjustment:
+        data.update({"reportedDiv": review["reported_div"], "divNote": adjustment["note"]})
+    data.pop("ratioDisplay", None)
+    entry = {"div": dividend, "reported_div": review["reported_div"], "cap": data["cap"],
+             "shares": data["shares"], "shares_at": shares_at, "div_source": review["source"],
+             "div_period": review["period"], "div_review_at": review["reviewed_at"],
+             "div_review_note": review["note"], "div_needs_review": needs_review,
+             "asof": datetime.now(JST).strftime("%Y-%m-%d"), "quote_at": data["quoteAt"],
+             "quote_source": source, "price": price, "update_warning": data["updateWarning"]}
+    return data, entry
 
 
 def main():
     page_path = os.path.join(ROOT, "d1/index.html")
     cache_path = os.path.join(ROOT, "data/dividends.json")
-    page = open(page_path, encoding="utf-8").read()
-    cache = json.load(open(cache_path, encoding="utf-8")) if os.path.exists(cache_path) else {}
-    rows = re.findall(r'^  \{code:"(\d{4})"[^\n]*\},$', page, re.M)
+    with open(page_path, encoding="utf-8") as file:
+        page = file.read()
+    cache = {}
+    if os.path.exists(cache_path):
+        with open(cache_path, encoding="utf-8") as file:
+            cache = json.load(file)
+    row_texts = re.findall(r'^  \{code:"\d{4}"[^\n]*\},$', page, re.M)
+    previous = [json.loads(re.sub(r'([{,])\s*([A-Za-z]\w*)\s*:', r'\1"\2":',
+                               row.strip().rstrip(','))) for row in row_texts]
+    rows = [row["code"] for row in previous]
     if not rows or len(rows) != len(set(rows)):
         raise ValueError("Missing or duplicate stock codes")
-    updated, failed = [], []
+    old_data = {row["code"]: row for row in previous}
+    updated, failed, errors, needs_review = [], [], {}, []
     print(f"Refreshing {len(rows)} stocks", flush=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        tasks = {executor.submit(get_stock, code): code for code in rows}
+        tasks = {executor.submit(get_stock, code, old_data[code]): code for code in rows}
         for task in concurrent.futures.as_completed(tasks):
             code = tasks[task]
             try:
                 data, entry = task.result()
                 pattern = r'^  \{code:"' + code + r'"[^\n]*\},$'
                 old_row = re.search(pattern, page, re.M)[0]
-                name = re.search(r'name:("(?:[^"\\]|\\.)*")', old_row)[1]
-                industry = re.search(r'ind:("(?:[^"\\]|\\.)*")', old_row)[1]
-                new_row = '  {code:"' + code + '",name:' + name + ', ind:' + industry
-                new_row += ''.join(', ' + key + ':' + json.dumps(value, ensure_ascii=False, separators=(',', ':'))
-                                   for key, value in data.items()) + '},'
+                new_row = '  {' + ', '.join(key + ':' + json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+                                           for key, value in data.items()) + '},'
                 page = re.sub(pattern, lambda m: new_row, page, flags=re.M)
                 cache[code] = entry
                 updated.append(code)
+                if data["divNeedsReview"]:
+                    needs_review.append(code)
+                    print(f"::warning::Dividend basis needs review for {code}; retained reviewed dividend", flush=True)
                 print(f"[OK] {code} yield={data['cy']}% cap={data['cap']} history={data['historyPeriod']} quote={data['quoteAt']}", flush=True)
             except Exception as exc:
                 failed.append(code)
+                errors[code] = str(exc)
+                data = old_data[code].copy()
+                data.update({"updateStatus": "failed", "updateWarning": str(exc)})
+                new_row = '  {' + ', '.join(key + ':' + json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+                                           for key, value in data.items()) + '},'
+                page = re.sub(r'^  \{code:"' + code + r'"[^\n]*\},$', lambda m: new_row, page, flags=re.M)
                 print(f"[FAIL] {code}: {exc}", flush=True)
     now = datetime.now(JST)
-    if not failed:
+    if updated:
         page = re.sub(r"データ取得日: \d{4}年\d{1,2}月\d{1,2}日(?: [\d:]+)?",
                       f"データ取得日: {now.year}年{now.month}月{now.day}日 {now:%H:%M}", page)
-    with open(page_path, "w", encoding="utf-8") as file:
-        file.write(page)
-    with open(cache_path, "w", encoding="utf-8") as file:
-        json.dump(cache, file, ensure_ascii=False, indent=1)
-    with open(os.path.join(ROOT, "data/last_update.json"), "w", encoding="utf-8") as file:
-        json.dump({"run_at": now.isoformat(), "updated": sorted(updated), "failed": sorted(failed)}, file, ensure_ascii=False, indent=1)
+    summary = {"run_at": now.isoformat(), "updated": sorted(updated), "failed": sorted(failed),
+               "errors": errors, "dividend_needs_review": sorted(needs_review),
+               "history": "Retained verified ten completed fiscal years; not fetched on daily quote updates"}
+    summary_path = os.path.join(ROOT, "data/last_update.json")
+    with open(summary_path, "w", encoding="utf-8") as file:
+        json.dump(summary, file, ensure_ascii=False, indent=1)
+    if not updated:
+        raise SystemExit(f"No quotes updated: {errors}")
+    label = f"自動更新: {now:%Y/%m/%d %H:%M} JST ｜ 株価取得 {len(updated)}/{len(rows)}銘柄"
     if failed:
-        raise SystemExit(f"Failed stocks: {failed}")
+        label += " ｜ 前回値維持: " + "・".join(sorted(failed))
+    if needs_review:
+        label += " ｜ 配当要確認: " + "・".join(sorted(needs_review))
+    page = re.sub(r'(<div id="updateStatus"[^>]*>).*?(</div>)',
+                  lambda m: m[1] + html.escape(label) + m[2], page, flags=re.S)
+    # Write complete files only after quote validation; a failed stock retains its own timestamp.
+    for path, content in [(page_path, page), (cache_path, json.dumps(cache, ensure_ascii=False, indent=1) + "\n")]:
+        temp = path + ".tmp"
+        with open(temp, "w", encoding="utf-8") as file:
+            file.write(content)
+        os.replace(temp, path)
+    print(label, flush=True)
 
 
 if __name__ == "__main__":
