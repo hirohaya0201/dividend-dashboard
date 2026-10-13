@@ -27,17 +27,22 @@ jobs:
         with:
           python-version: '3.12'
       - name: Test updater failure handling
-        run: python -m unittest discover -s tests -v
+        run: |
+          rm -f data/last_update.json
+          python -m unittest discover -s tests -v
       - name: Update yields
+        id: yields
         run: python scripts/update_yields.py
       - name: Write update summary
         if: always()
+        env:
+          UPDATE_OUTCOME: ${{ steps.yields.outcome }}
         run: |
           python - <<'PY'
           import json, os
           from pathlib import Path
           path = Path('data/last_update.json')
-          if path.exists():
+          if path.exists() and os.environ['UPDATE_OUTCOME'] in ('success', 'failure'):
               data = json.loads(path.read_text())
               with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
                   out.write('## Dividend update\n\n')
@@ -46,6 +51,10 @@ jobs:
                   out.write(f"Dividend review needed: {data.get('dividend_needs_review', [])}\n\n")
                   for code, error in data.get('errors', {}).items():
                       out.write(f'- {code}: {error}\n')
+          else:
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+                  out.write(f"Update yields: {os.environ['UPDATE_OUTCOME']}\n\n")
+                  out.write('Current-run update report unavailable; previous results are not shown.\n')
           PY
       - name: Commit and push
         run: |
@@ -57,3 +66,4 @@ jobs:
             git pull --rebase origin main
             git push origin HEAD:main
           fi
+

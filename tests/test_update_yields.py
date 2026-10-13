@@ -5,6 +5,7 @@ import json
 import re
 import tempfile
 import unittest
+from urllib.error import HTTPError
 from copy import deepcopy
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -20,6 +21,7 @@ ROWS = {s['code']: s for s in [json.loads(re.sub(r'([{,])\s*([A-Za-z]\w*)\s*:', 
 def previous(code='8725'):
     s = deepcopy(ROWS[code])
     s['quoteAt'] = (datetime.now(u.JST) - timedelta(days=1)).isoformat()
+    s['sharesAt'] = (datetime.fromisoformat(s['quoteAt']) - timedelta(days=1)).isoformat()
     return s
 
 
@@ -30,6 +32,31 @@ def quote(s):
 
 
 class UpdaterTests(unittest.TestCase):
+    def test_http_403_is_not_retried_and_keeps_diagnostics(self):
+        url = 'https://finance.yahoo.co.jp/quote/8725.T'
+        error = HTTPError(url, 403, 'Forbidden', {'Server': 'test-server'}, None)
+        with patch.object(u, 'urlopen', side_effect=error) as opener, patch.object(u.time, 'sleep') as sleep:
+            with self.assertRaisesRegex(OSError, 'HTTP 403.*test-server'):
+                u.fetch(url)
+        self.assertEqual(opener.call_count, 1)
+        sleep.assert_not_called()
+
+    def test_http_429_and_500_have_bounded_retries(self):
+        url = 'https://finance.yahoo.co.jp/quote/8725.T'
+        for status in (429, 500):
+            with self.subTest(status=status):
+                error = HTTPError(url, status, 'Retryable', {}, None)
+                with patch.object(u, 'urlopen', side_effect=error) as opener, patch.object(u.time, 'sleep') as sleep:
+                    with self.assertRaises(OSError):
+                        u.fetch(url)
+                self.assertEqual(opener.call_count, 3)
+                self.assertEqual([c.args[0] for c in sleep.call_args_list], [1, 2])
+
+    def test_both_quote_sources_fail_keeps_both_errors(self):
+        with patch.object(u, 'fetch', side_effect=[OSError('Japan HTTP 403'), OSError('chart HTTP 429')]):
+            with self.assertRaisesRegex(OSError, 'Japan HTTP 403.*chart HTTP 429'):
+                u.get_stock('8725', previous())
+
     def test_quotes_do_not_depend_on_irbank_and_keep_history_and_adjustment(self):
         s = previous()
         with patch.object(u, 'fetch', return_value='quote') as fetch, patch.object(u, 'parse_yahoo', return_value=quote(s)):
@@ -50,8 +77,17 @@ class UpdaterTests(unittest.TestCase):
         self.assertEqual(data['price'], 4900)
         self.assertEqual(data['div'], 140)
         self.assertEqual(data['quoteSource'], 'Yahoo Finance chart API')
-        self.assertEqual(data['sharesAt'], s['quoteAt'])
+        self.assertEqual(data['sharesAt'], s['sharesAt'])
         self.assertIn('前回確認値', data['updateWarning'])
+
+    def test_chart_fallback_without_shares_at_uses_previous_quote_at(self):
+        s = previous()
+        s.pop('sharesAt')
+        chart_quote = quote(s)
+        chart_quote.update({'div': None, 'div_period': None})
+        with patch.object(u, 'fetch', side_effect=[OSError('Japan quote HTTP 403'), 'chart']), patch.object(u, 'parse_chart', return_value=chart_quote):
+            data, _ = u.get_stock(s['code'], s)
+        self.assertEqual(data['sharesAt'], s['quoteAt'])
 
     def test_revised_forecast_keeps_reviewed_dividend_and_refreshes_price(self):
         s = previous()
@@ -128,3 +164,4 @@ class UpdaterTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

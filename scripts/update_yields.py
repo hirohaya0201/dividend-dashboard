@@ -34,6 +34,11 @@ def fetch(url):
         except (HTTPError, URLError, TimeoutError, OSError) as exc:
             retryable = not isinstance(exc, HTTPError) or exc.code == 429 or exc.code >= 500
             if attempt == 2 or not retryable:
+                if isinstance(exc, HTTPError):
+                    headers = exc.headers or {}
+                    details = {key: headers[key] for key in
+                               ('Server', 'Retry-After', 'CF-Ray', 'X-Request-ID') if key in headers}
+                    raise OSError(f"{url}: HTTP {exc.code} {exc.reason}; diagnostics={details}") from exc
                 raise OSError(f"{url}: {exc}") from exc
             time.sleep(2 ** attempt)
 
@@ -205,7 +210,10 @@ def get_stock(code, previous):
     except Exception as exc:
         warnings.append(str(exc))
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{code}.T?range=1mo&interval=1d&events=splits"
-        yahoo = parse_chart(fetch(url), code, previous)
+        try:
+            yahoo = parse_chart(fetch(url), code, previous)
+        except Exception as chart_exc:
+            raise OSError(f"Yahoo Japan failed: {exc}; Yahoo chart failed: {chart_exc}") from chart_exc
         source = "Yahoo Finance chart API"
         shares_at = previous.get("sharesAt", previous["quoteAt"])
         warnings.append("配当予想・株式数は前回確認値を使用")
@@ -295,6 +303,8 @@ def main():
                     needs_review.append(code)
                     print(f"::warning::Dividend basis needs review for {code}; retained reviewed dividend", flush=True)
                 print(f"[OK] {code} yield={data['cy']}% cap={data['cap']} history={data['historyPeriod']} quote={data['quoteAt']}", flush=True)
+                if data['updateWarning']:
+                    print(f"[WARN] {code}: {data['updateWarning']}", flush=True)
             except Exception as exc:
                 failed.append(code)
                 errors[code] = str(exc)
@@ -334,4 +344,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
